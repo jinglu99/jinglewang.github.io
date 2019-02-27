@@ -21,7 +21,7 @@
 <meta property="og:description" content="Java内存区域 对于从事C、C++的开发人员来说，在内存管理方面他们对于每一个对象都拥有所有权，需要负责每一个对象的创建与销毁。对于从事Java的开发人员来说，由于有垃圾回收机制的存在，可以不用对对象的内存管理负责，但一旦出现内存泄漏，如果不了解虚拟机的内存机制，对于开发人员来说查找错误是非常困难的。  [TOC] 运行时数据区域 在Jvm规范中，规定了上图所示的几个数据区域，有些是所有线程都共">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://pic.jingl.wang/2018-04-15-064544.jpg">
-<meta property="og:updated_time" content="2019-02-27T13:31:19.968Z">
+<meta property="og:updated_time" content="2019-02-27T14:27:50.207Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java内存区域">
 <meta name="twitter:description" content="Java内存区域 对于从事C、C++的开发人员来说，在内存管理方面他们对于每一个对象都拥有所有权，需要负责每一个对象的创建与销毁。对于从事Java的开发人员来说，由于有垃圾回收机制的存在，可以不用对对象的内存管理负责，但一旦出现内存泄漏，如果不了解虚拟机的内存机制，对于开发人员来说查找错误是非常困难的。  [TOC] 运行时数据区域 在Jvm规范中，规定了上图所示的几个数据区域，有些是所有线程都共">
@@ -33,7 +33,7 @@
     
 
     
-        <link rel="icon" href="/css/images/logo.png">
+        <link rel="icon" href="/css/images/fa.png">
     
 
     <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
@@ -51,6 +51,17 @@
         <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
     
     
+    
+        <script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?5c9a78680a0beac69fe3d9882e30c48e";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
     
 
 
@@ -79,10 +90,6 @@
                             
                                         <ul class="main-nav-list"><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/Java/">Java</a></li></ul>
                                     
-                                <li class="main-nav-list-item">
-                                    <a class="main-nav-list-link" href="/about/index.html">关于</a>
-                                </li>
-                            
                         </ul>
                         <nav id="sub-nav">
                             <div id="search-form-wrap">
@@ -220,7 +227,7 @@
 
 
 
-    <a data-url="http://yoursite.com/2018/04/14/JavaMemory/" data-id="cjsn88zst0000amwim1c5ptu5" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+    <a data-url="http://yoursite.com/2018/04/14/JavaMemory/" data-id="cjsnc9us30000a3wis0vxo3u4" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
 <script>
     (function ($) {
         $('body').on('click', function() {
@@ -339,7 +346,7 @@
             
                 
                 <li>
-                    <a class="social-tooltip" title="facebook" href="/" target="_blank" rel="noopener">
+                    <a class="social-tooltip" title="facebook" href="https://www.facebook.com/ben.wang.79219" target="_blank" rel="noopener">
                         <i class="icon fa fa-facebook"></i>
                     </a>
                 </li>
@@ -355,7 +362,7 @@
             
                 
                 <li>
-                    <a class="social-tooltip" title="github" href="https://github.com/ppoffice/hexo-theme-hueman" target="_blank" rel="noopener">
+                    <a class="social-tooltip" title="github" href="https://github.com/jingleWang" target="_blank" rel="noopener">
                         <i class="icon fa fa-github"></i>
                     </a>
                 </li>
@@ -363,7 +370,7 @@
             
                 
                 <li>
-                    <a class="social-tooltip" title="weibo" href="/" target="_blank" rel="noopener">
+                    <a class="social-tooltip" title="weibo" href="https://www.weibo.com/wjl0225" target="_blank" rel="noopener">
                         <i class="icon fa fa-weibo"></i>
                     </a>
                 </li>

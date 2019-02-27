@@ -3,25 +3,25 @@ menu:
     Home: /
     # Delete this row if you don't want categories in your header nav bar
     Categories:
-    About: /about/index.html
+   # About: /about/index.html
 
 # Customize
 customize:
     logo:
-        width: 165
-        height: 165
+        width: 200
+        height: 100
         url: images/logo.png
     theme_color: '#006bde'
     highlight: androidstudio
     sidebar: left # sidebar position, options: left, right
     thumbnail: true # enable posts thumbnail, options: true, false
-    favicon: "css/images/logo.png" # path to favicon
+    favicon: "css/images/fa.png" # path to favicon
     social_links: # for more icons, please see http://fontawesome.io/icons/#brand
         twitter: /
-        facebook: /
+        facebook: https://www.facebook.com/ben.wang.79219
         google-plus: /
-        github: https://github.com/ppoffice/hexo-theme-hueman
-        weibo: /
+        github: https://github.com/jingleWang
+        weibo: https://www.weibo.com/wjl0225
         rss: /
 
 # Widgets
@@ -92,7 +92,7 @@ plugins:
     lightgallery: true # options: true, false
     justifiedgallery: true # options: true, false
     google_analytics: # enter the tracking ID for your Google Analytics
-    baidu_analytics: # enter Baidu Analytics hash key
+    baidu_analytics: '5c9a78680a0beac69fe3d9882e30c48e' # enter Baidu Analytics hash key
     bing_site_verification: # enter Bing verification key here
     statcounter:
       sc_project: # enter statcounter project id

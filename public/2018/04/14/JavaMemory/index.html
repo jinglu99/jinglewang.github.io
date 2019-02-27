@@ -21,7 +21,7 @@
 <meta property="og:description" content="Java内存区域 对于从事C、C++的开发人员来说，在内存管理方面他们对于每一个对象都拥有所有权，需要负责每一个对象的创建与销毁。对于从事Java的开发人员来说，由于有垃圾回收机制的存在，可以不用对对象的内存管理负责，但一旦出现内存泄漏，如果不了解虚拟机的内存机制，对于开发人员来说查找错误是非常困难的。  [TOC] 运行时数据区域 在Jvm规范中，规定了上图所示的几个数据区域，有些是所有线程都共">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://pic.jingl.wang/2018-04-15-064544.jpg">
-<meta property="og:updated_time" content="2019-02-27T11:42:18.970Z">
+<meta property="og:updated_time" content="2019-02-27T11:45:27.028Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="RPC介绍">
 <meta name="twitter:description" content="Java内存区域 对于从事C、C++的开发人员来说，在内存管理方面他们对于每一个对象都拥有所有权，需要负责每一个对象的创建与销毁。对于从事Java的开发人员来说，由于有垃圾回收机制的存在，可以不用对对象的内存管理负责，但一旦出现内存泄漏，如果不了解虚拟机的内存机制，对于开发人员来说查找错误是非常困难的。  [TOC] 运行时数据区域 在Jvm规范中，规定了上图所示的几个数据区域，有些是所有线程都共">
@@ -204,8 +204,7 @@
 <p>​    （4）接下来，需要对对象进行必要的设置，比如这个对象是哪个类的实例，如何才能找到这个类的元数据信息，对象的哈希，对象的分代年龄信息等，这些都存储在对象头中。</p>
 <p>​    （5）在完成了以上操作后，在JVM角度，一个对象已经产生了，但是一般来说，一个对象还需要按照开发人员的意愿进行初始化，所以JVM执行完new指令是接着会执行<init>方法，对对象进行初始化操作。</init></p>
 <h3 id="对象的内存布局"><a href="#对象的内存布局" class="headerlink" title="对象的内存布局"></a>对象的内存布局</h3><p>​    在HotSpot虚拟机中，对象的内存布局配分为3块：对象头、实例数据、对齐填充。</p>
-<pre><code>#### 对象头
-</code></pre><p>​    HotSpot的对象头包括2部分，一部分是记录对象的运行时数据，如哈希码，GC分代年龄，锁状态标志，线程持有的锁，偏向线程ID，偏向时间戳等，这部分数据长度在32bit和64bit的JVM中分别为32bit和64bit；另一部分是类型指针，即对象执行他的类元数据的指针，通过这个指针，可以知道这个对象是哪个类的实例，对于数组对象，这里还有有一个表示数组大小的标志。</p>
+<h4 id="对象头"><a href="#对象头" class="headerlink" title="对象头"></a>对象头</h4><p>​    HotSpot的对象头包括2部分，一部分是记录对象的运行时数据，如哈希码，GC分代年龄，锁状态标志，线程持有的锁，偏向线程ID，偏向时间戳等，这部分数据长度在32bit和64bit的JVM中分别为32bit和64bit；另一部分是类型指针，即对象执行他的类元数据的指针，通过这个指针，可以知道这个对象是哪个类的实例，对于数组对象，这里还有有一个表示数组大小的标志。</p>
 <h4 id="实例数据"><a href="#实例数据" class="headerlink" title="实例数据"></a>实例数据</h4><p>​    实例数据部分是对象真正存储有效数据的地方，无论是在父类中继承的还是在子类中定义的，都会在这里被记录。这部分的存储顺序会受到JVM的分配策略和在源码中定义的顺序的影响。</p>
 <h4 id="对齐填充"><a href="#对齐填充" class="headerlink" title="对齐填充"></a>对齐填充</h4><p>​    一个对象实例在内存中所占空间的大小，必须是8字节的整数倍，所以，需要这块空间将一个对象填充。</p>
 <h3 id="对象的定位"><a href="#对象的定位" class="headerlink" title="对象的定位"></a>对象的定位</h3><p>​    创建对象是为了使用对象，在Java栈的局部变量表中只存储了指向这个对象的引用，却没有规定如何通过这个引用去找到对象，接下来，我会介绍一下2中主流的定位对象的方法：通过使用句柄和直接访问。</p>
@@ -221,7 +220,7 @@
 
 
 
-    <a data-url="http://yoursite.com/2018/04/14/JavaMemory/" data-id="cjsn4tdkt00005swi0nkz0t6a" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+    <a data-url="http://yoursite.com/2018/04/14/JavaMemory/" data-id="cjsn7k97c0000y4wi0oqwu8tt" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
 <script>
     (function ($) {
         $('body').on('click', function() {
@@ -305,7 +304,7 @@
 [TOC]
 运行时数据区域
 在Jvm规范中，规定了上图所示的几个数据区域，有些是所有线程都共"
-        "wordCount": 182
+        "wordCount": 185
     }
 </script>
 

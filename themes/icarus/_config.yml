@@ -157,15 +157,16 @@ widgets:
         type: toc
         # Where should the widget be placed, left or right
         position: left
-    # -
-    #     # Widget name
-    #     type: links
-    #     # Where should the widget be placed, left or right
-    #     position: left
-    #     # Links to be shown in the links widget
-    #     links:
-    #         Hexo: 'https://hexo.io'
-    #         PPOffice: 'https://github.com/ppoffice'
+    -
+        # Widget name
+        type: links
+        # Where should the widget be placed, left or right
+        position: left
+        # Links to be shown in the links widget
+        links:
+            Leo Ni: 'http://nikan1996.coding.me/'
+            zz: 'http://zzcoder.cn/'
+            zcy: 'https://zhengchenyang.github.io/'
     -
         # Widget name
         type: category

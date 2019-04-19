@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+<title>ConcurrentHashMap源码浅析 - Ben&#39;s Blog</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+    <meta name="description" content="基本数据结构  用数组存储每个桶的首节点 使用hash值分桶 hash值相同的元素，以链表的形式存放在桶中 当一个桶内的元素超过8个时，将链表转换为红黑树">
+<meta name="keywords" content="Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ConcurrentHashMap源码浅析">
+<meta property="og:url" content="http://yoursite.com/2018/02/01/java/ConcurrentHashMap源码浅析/index.html">
+<meta property="og:site_name" content="Ben&#39;s Blog">
+<meta property="og:description" content="基本数据结构  用数组存储每个桶的首节点 使用hash值分桶 hash值相同的元素，以链表的形式存放在桶中 当一个桶内的元素超过8个时，将链表转换为红黑树">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://pic.jingl.wang/2018-04-14-114851.png">
+<meta property="og:image" content="http://pic.jingl.wang/2018-04-14-114947.png">
+<meta property="og:image" content="http://pic.jingl.wang/2018-04-14-115015.png">
+<meta property="og:updated_time" content="2019-03-04T03:01:30.136Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ConcurrentHashMap源码浅析">
+<meta name="twitter:description" content="基本数据结构  用数组存储每个桶的首节点 使用hash值分桶 hash值相同的元素，以链表的形式存放在桶中 当一个桶内的元素超过8个时，将链表转换为红黑树">
+<meta name="twitter:image" content="http://pic.jingl.wang/2018-04-14-114851.png">
+
+
+
+
+
+<link rel="icon" href="/images/logo.png">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css">
+
+
+    
+    
+    
+    <style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+    
+
+    
+    
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+    
+
+    
+    
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+
+    
+    
+    
+    
+
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+
+    
+    
+
+    
+    
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?5c9a78680a0beac69fe3d9882e30c48e";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+    
+    
+    
+
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/jinglu.png" alt="ConcurrentHashMap源码浅析" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item" href="/">Home</a>
+                
+                <a class="navbar-item" href="/archives">Archives</a>
+                
+                <a class="navbar-item" href="/categories">Categories</a>
+                
+                <a class="navbar-item" href="/tags">Tags</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    
+                    <a class="navbar-item" target="_blank" title="GitHub" href="https://github.com/jingleWang">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main"><div class="card">
+    
+    <div class="card-image">
+        <span class="image is-7by1">
+            <img class="thumbnail" src="http://pic.jingl.wang/2018-04-14-115554.jpg" alt="ConcurrentHashMap源码浅析">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey" datetime="2018-02-01T09:48:25.000Z">2018-02-01</time>
+                
+                <div class="level-item">
+                <a class="has-link-grey -link" href="/categories/Java/">Java</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/Java/源码阅读/">源码阅读</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    16 分钟 读完 (大约 2460 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+                ConcurrentHashMap源码浅析
+            
+        </h1>
+        <div class="content">
+            <h2 id="基本数据结构"><a href="#基本数据结构" class="headerlink" title="基本数据结构"></a>基本数据结构</h2><p><img src="http://pic.jingl.wang/2018-04-14-114851.png" alt></p>
+<ul>
+<li>用数组存储每个桶的首节点</li>
+<li>使用hash值分桶</li>
+<li>hash值相同的元素，以链表的形式存放在桶中</li>
+<li>当一个桶内的元素超过8个时，将链表转换为红黑树</li>
+</ul>
+<a id="more"></a>
+<h2 id="Node类"><a href="#Node类" class="headerlink" title="Node类"></a>Node类</h2><figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">static class Node&lt;K,V&gt; implements Map.Entry&lt;K,V&gt; &#123;</span><br><span class="line">    final int hash;</span><br><span class="line">    final K key;</span><br><span class="line">    volatile V val;</span><br><span class="line">    volatile Node&lt;K,V&gt; next;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="map中最基本的结构，由4个成员变量组成："><a href="#map中最基本的结构，由4个成员变量组成：" class="headerlink" title="map中最基本的结构，由4个成员变量组成："></a>map中最基本的结构，由4个成员变量组成：</h3><ul>
+<li>hash：当前结点的hash值，在子类中，hash值可以为负，有特殊含义</li>
+<li>key： 结点的key</li>
+<li>val：结点的value</li>
+<li>next：指向下一个结点的指针</li>
+</ul>
+<h3 id="此外还提供一个方法find方法"><a href="#此外还提供一个方法find方法" class="headerlink" title="此外还提供一个方法find方法"></a>此外还提供一个方法<code>find</code>方法</h3><figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Virtualized support for map.get(); overridden in subclasses.</span><br><span class="line"> */</span><br><span class="line">Node&lt;K,V&gt; find(int h, Object k) &#123;</span><br><span class="line">    Node&lt;K,V&gt; e = this;</span><br><span class="line">    if (k != null) &#123;</span><br><span class="line">        do &#123;</span><br><span class="line">            //在链表中寻找</span><br><span class="line">            K ek;</span><br><span class="line">            if (e.hash == h &amp;&amp;</span><br><span class="line">                ((ek = e.key) == k || (ek != null &amp;&amp; k.equals(ek))))</span><br><span class="line">                return e;</span><br><span class="line">        &#125; while ((e = e.next) != null);</span><br><span class="line">    &#125;</span><br><span class="line">    return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当桶中元素以链表形式存储时，调用find函数寻找对应元素，当以红黑树存放时，调用<code>TreeNode</code>中的find函数查找。</p>
+<h2 id="TreeBin类"><a href="#TreeBin类" class="headerlink" title="TreeBin类"></a>TreeBin类</h2><p>当每个桶中元素超过8个时，会将链表变为一颗红黑树，TreeBin是红黑树的包装类，保存了红黑树的根节点，此外这个类提供一个读写锁，用于在红黑树进行调整的时候进行线程，红黑书的基本结点为<code>TreeNode</code>类型</p>
+<h2 id="ForwardingNode类型"><a href="#ForwardingNode类型" class="headerlink" title="ForwardingNode类型"></a>ForwardingNode类型</h2><p>在扩容过程中，当前桶已经完成遍历时，将当前桶在table数组中标记为ForwardingNode类型，当调用get方法查询该桶内元素时，实际调用该类的find方法去nextTable中寻找对应数据。</p>
+<h2 id="put方法"><a href="#put方法" class="headerlink" title="put方法"></a>put方法</h2><h3 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h3><p><img src="http://pic.jingl.wang/2018-04-14-114947.png" alt></p>
+<h3 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h3><figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line">/** Implementation for put and putIfAbsent */</span><br><span class="line">final V putVal(K key, V value, boolean onlyIfAbsent) &#123;</span><br><span class="line">    //当key为null时，抛出异常，所有ConcurrentHashMap的key不能为null</span><br><span class="line">    if (key == null || value == null) throw new NullPointerException();</span><br><span class="line">    </span><br><span class="line">    //计算新节点的hash值</span><br><span class="line">    int hash = spread(key.hashCode());</span><br><span class="line">    int binCount = 0;</span><br><span class="line">    </span><br><span class="line">    //进入一个死循环，当插入成功后才能跳出循环</span><br><span class="line">    for (Node&lt;K,V&gt;[] tab = table;;) &#123;</span><br><span class="line">        Node&lt;K,V&gt; f; int n, i, fh; K fk; V fv;</span><br><span class="line">        </span><br><span class="line">        //当前table为空，初始化</span><br><span class="line">        if (tab == null || (n = tab.length) == 0)</span><br><span class="line">            tab = initTable();</span><br><span class="line">            </span><br><span class="line">        //对应桶首节点为空，cas插入新的桶节点</span><br><span class="line">        else if ((f = tabAt(tab, i = (n - 1) &amp; hash)) == null) &#123;</span><br><span class="line">            if (casTabAt(tab, i, null, new Node&lt;K,V&gt;(hash, key, value)))</span><br><span class="line">                break;                   // no lock when adding to empty bin</span><br><span class="line">        &#125;</span><br><span class="line">        //对应桶在进行扩容，即该结点类型为`ForwardingNode`</span><br><span class="line">        else if ((fh = f.hash) == MOVED)</span><br><span class="line">            tab = helpTransfer(tab, f);</span><br><span class="line">        //判断首结点</span><br><span class="line">        else if (onlyIfAbsent &amp;&amp; fh == hash &amp;&amp;  // check first node</span><br><span class="line">                 ((fk = f.key) == key || fk != null &amp;&amp; key.equals(fk)) &amp;&amp;</span><br><span class="line">                 (fv = f.val) != null)</span><br><span class="line">            return fv;</span><br><span class="line">        else &#123;</span><br><span class="line">            V oldVal = null;</span><br><span class="line">            //进入临界区</span><br><span class="line">            synchronized (f) &#123;</span><br><span class="line">                if (tabAt(tab, i) == f) &#123;</span><br><span class="line">                    //如果以链表形式存放，将新节点插入链接最后位置</span><br><span class="line">                    if (fh &gt;= 0) &#123;</span><br><span class="line">                        binCount = 1;</span><br><span class="line">                        for (Node&lt;K,V&gt; e = f;; ++binCount) &#123;</span><br><span class="line">                            K ek;</span><br><span class="line">                            if (e.hash == hash &amp;&amp;</span><br><span class="line">                                ((ek = e.key) == key ||</span><br><span class="line">                                 (ek != null &amp;&amp; key.equals(ek)))) &#123;</span><br><span class="line">                                oldVal = e.val;</span><br><span class="line">                                if (!onlyIfAbsent)</span><br><span class="line">                                    e.val = value;</span><br><span class="line">                                break;</span><br><span class="line">                            &#125;</span><br><span class="line">                            Node&lt;K,V&gt; pred = e;</span><br><span class="line">                            if ((e = e.next) == null) &#123;</span><br><span class="line">                                pred.next = new Node&lt;K,V&gt;(hash, key, value);</span><br><span class="line">                                break;</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                    //如果以红黑树形式存放，将新节点插入红黑树</span><br><span class="line">                    else if (f instanceof TreeBin) &#123;</span><br><span class="line">                        Node&lt;K,V&gt; p;</span><br><span class="line">                        binCount = 2;</span><br><span class="line">                        if ((p = ((TreeBin&lt;K,V&gt;)f).putTreeVal(hash, key,</span><br><span class="line">                                                       value)) != null) &#123;</span><br><span class="line">                            oldVal = p.val;</span><br><span class="line">                            if (!onlyIfAbsent)</span><br><span class="line">                                p.val = value;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                    else if (f instanceof ReservationNode)</span><br><span class="line">                        throw new IllegalStateException(&quot;Recursive update&quot;);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        </span><br><span class="line">            if (binCount != 0) &#123;</span><br><span class="line">            </span><br><span class="line">                //如果桶内元素树达到临界值，转换为红黑树</span><br><span class="line">                if (binCount &gt;= TREEIFY_THRESHOLD)</span><br><span class="line">                    treeifyBin(tab, i);、</span><br><span class="line">                //如果当前key已存在，则替换对应node中的value，返回，不需要改变计数器</span><br><span class="line">                if (oldVal != null)</span><br><span class="line">                    return oldVal;</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    addCount(1L, binCount);</span><br><span class="line">    return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>多个线程可以同时调用，在插入时，只对对应桶进行加锁操作，粒度更细</p>
+<h3 id="initTable方法"><a href="#initTable方法" class="headerlink" title="initTable方法"></a>initTable方法</h3><p>initTable可以运行多个线程同时调用，但只有一个线程可以进行初始化，其他线程通过<code>yield</code>让出cpu</p>
+<h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><p><img src="http://pic.jingl.wang/2018-04-14-115015.png" alt></p>
+<h3 id="源码分析-1"><a href="#源码分析-1" class="headerlink" title="源码分析"></a>源码分析</h3><figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Initializes table, using the size recorded in sizeCtl.</span><br><span class="line"> *  sizeCtl 状态：</span><br><span class="line"> *  1. = -1 : 正在初始化</span><br><span class="line"> *  2. &lt; -1 : 正在扩容，数值为 -(1 + 参与扩容的线程数)</span><br><span class="line"> *  3. = 0  : 创建时初始为0</span><br><span class="line"> *  4. &gt; 0  : 下一次扩容的大小</span><br><span class="line"> */</span><br><span class="line">private final Node&lt;K,V&gt;[] initTable() &#123;</span><br><span class="line">    Node&lt;K,V&gt;[] tab; int sc;</span><br><span class="line">    while ((tab = table) == null || tab.length == 0) &#123;</span><br><span class="line">        //其他线程正进行操作，让出cpu</span><br><span class="line">        if ((sc = sizeCtl) &lt; 0)</span><br><span class="line">            Thread.yield(); // lost initialization race; just spin</span><br><span class="line">            </span><br><span class="line">        /*</span><br><span class="line">        * 将sizeCtl改为初始化状态，由于使用cas方法，可以保证：</span><br><span class="line">        * 如果改变状态后，没有其他线程可以进入以下代码段；</span><br><span class="line">        * 如果该cas方法执行失败，代表其他线程已经进入了该代码段，所以需要重新进入循环获得新的sizeCtl</span><br><span class="line">        */</span><br><span class="line">        else if (U.compareAndSetInt(this, SIZECTL, sc, -1)) &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                //进行初始化操作</span><br><span class="line">                //由于所有之前让出cpu的线程最终都会进入该代码块，所以需要在这里重新判断一下table是否为空，如果已经初始化则跳出</span><br><span class="line">                if ((tab = table) == null || tab.length == 0) &#123;</span><br><span class="line">                    int n = (sc &gt; 0) ? sc : DEFAULT_CAPACITY;</span><br><span class="line">                    @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">                    Node&lt;K,V&gt;[] nt = (Node&lt;K,V&gt;[])new Node&lt;?,?&gt;[n];</span><br><span class="line">                    table = tab = nt;</span><br><span class="line">                    sc = n - (n &gt;&gt;&gt; 2);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; finally &#123;</span><br><span class="line">                sizeCtl = sc;</span><br><span class="line">            &#125;</span><br><span class="line">            break;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return tab;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="扩容"><a href="#扩容" class="headerlink" title="扩容"></a>扩容</h2><h3 id="扩容的触发"><a href="#扩容的触发" class="headerlink" title="扩容的触发"></a>扩容的触发</h3><p>在每次调用put方法进行数据插入后，都会调用<code>addCount</code>方法进行计数器的更新，当元素数量满足扩容条件后调用transfer进行扩容，多个线程可以进行协助扩容。在扩容过程中，新的数据存放在nextTable中。</p>
+<h3 id="扩容的整体思路"><a href="#扩容的整体思路" class="headerlink" title="扩容的整体思路"></a>扩容的整体思路</h3><ul>
+<li>首先对nextTable数组进行初始化，该操作只能由一个数组完成。</li>
+<li>对整个table数组进行遍历，将table中元素复制到nexttable中：<ul>
+<li>如果当前位置元素为null，则将该位置的数组元素替换为ForwordingNode节点。</li>
+<li>如果当前位置元素为非空，则将桶内元素重新放入正确位置。</li>
+<li>如果该桶已经处理完毕，就将该桶的首元素替换为ForwardingNode节点。</li>
+</ul>
+</li>
+<li>当所有节点都完成了扩容，将table赋值为nextTable，sizeCtl复制为新容量的0.75倍</li>
+</ul>
+<h4 id="多线程扩容"><a href="#多线程扩容" class="headerlink" title="多线程扩容"></a>多线程扩容</h4><p>ConcurrentHashMap中存在一个叫<code>transferIndex</code>的成员变量，代表下一个需要进行元素复制的桶的下标，当存在线程对该下标对应的桶进行操作时，将transfer利用cas设置成下个需要操作的桶下标，由于使用了cas和volatile，实现了多线程进行数组遍历，进而实现多线程协同遍历;每当处理完一个节点，将该节点set成forwordingNode,当其他节点处理到这个节点后，直接跳过。</p>
+<h3 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h3><figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Moves and/or copies the nodes in each bin to new table. See</span><br><span class="line"> * above for explanation.</span><br><span class="line"> */</span><br><span class="line">private final void transfer(Node&lt;K,V&gt;[] tab, Node&lt;K,V&gt;[] nextTab) &#123;</span><br><span class="line">    int n = tab.length, stride;</span><br><span class="line">    if ((stride = (NCPU &gt; 1) ? (n &gt;&gt;&gt; 3) / NCPU : n) &lt; MIN_TRANSFER_STRIDE)</span><br><span class="line">        stride = MIN_TRANSFER_STRIDE; // subdivide range</span><br><span class="line"></span><br><span class="line">    //当nextTable==null，初始化nextTable</span><br><span class="line">    if (nextTab == null) &#123;            // initiating</span><br><span class="line">        try &#123;</span><br><span class="line">            @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">            //将nextTable初始化为table大小的2倍</span><br><span class="line">            Node&lt;K,V&gt;[] nt = (Node&lt;K,V&gt;[])new Node&lt;?,?&gt;[n &lt;&lt; 1];</span><br><span class="line">            nextTab = nt;</span><br><span class="line">        &#125; catch (Throwable ex) &#123;      // try to cope with OOME</span><br><span class="line">            sizeCtl = Integer.MAX_VALUE;</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        nextTable = nextTab;</span><br><span class="line">        //设置transfetIndex为table最后一个桶</span><br><span class="line">        transferIndex = n;</span><br><span class="line">    &#125;</span><br><span class="line">    int nextn = nextTab.length;</span><br><span class="line">    ForwardingNode&lt;K,V&gt; fwd = new ForwardingNode&lt;K,V&gt;(nextTab);</span><br><span class="line">    boolean advance = true;</span><br><span class="line">    boolean finishing = false; // to ensure sweep before committing nextTab</span><br><span class="line">    </span><br><span class="line">    //开始循环遍历（table从后往前）</span><br><span class="line">    //i为当前进行复制的桶，bound表示当前线程需要复制下标在bound之前的桶</span><br><span class="line">    for (int i = 0, bound = 0;;) &#123;</span><br><span class="line">        Node&lt;K,V&gt; f; int fh;</span><br><span class="line">        </span><br><span class="line">        //遍历从nextIndex到transferIndex之间的桶</span><br><span class="line">        while (advance) &#123;</span><br><span class="line">            int nextIndex, nextBound;</span><br><span class="line">            </span><br><span class="line">            //当前桶还在bound之间</span><br><span class="line">            if (--i &gt;= bound || finishing)</span><br><span class="line">                advance = false;</span><br><span class="line">            </span><br><span class="line">            //当table中所有的桶已经被复制</span><br><span class="line">            else if ((nextIndex = transferIndex) &lt;= 0) &#123;</span><br><span class="line">                i = -1;</span><br><span class="line">                advance = false;</span><br><span class="line">            &#125;</span><br><span class="line">            //当线程首次进入该循环，</span><br><span class="line">            //或已经完成上次设置范围内桶复制，但还有桶未被复制时</span><br><span class="line">            //设置该线程需要复制的桶的下标范围</span><br><span class="line">            else if (U.compareAndSetInt</span><br><span class="line">                     (this, TRANSFERINDEX, nextIndex,</span><br><span class="line">                      nextBound = (nextIndex &gt; stride ?</span><br><span class="line">                                   nextIndex - stride : 0))) &#123;</span><br><span class="line">                bound = nextBound;</span><br><span class="line">                i = nextIndex - 1;</span><br><span class="line">                advance = false;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        //完成扩容</span><br><span class="line">        if (i &lt; 0 || i &gt;= n || i + n &gt;= nextn) &#123;</span><br><span class="line">            int sc;</span><br><span class="line">            //当finishing标记为ture时，表示整个扩容过程已经完成，进行扫尾工作</span><br><span class="line">            if (finishing) &#123;</span><br><span class="line">                //将table 赋值为 nextTable； 将nextTable赋值为null 重置 sizeCtl</span><br><span class="line">                nextTable = null;</span><br><span class="line">                table = nextTab;</span><br><span class="line">                sizeCtl = (n &lt;&lt; 1) - (n &gt;&gt;&gt; 1);</span><br><span class="line">                return;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            //该线程已经完成了扩容任务，在退出前需要检查其他线程是否还在进行扩容</span><br><span class="line">            //如果还存在未完成的线程，结束操作</span><br><span class="line">            //如果所有线程已经完成扩容，则将finishing标记为true，在进行一次完成扩容的检查。</span><br><span class="line">            if (U.compareAndSetInt(this, SIZECTL, sc = sizeCtl, sc - 1)) &#123;</span><br><span class="line">                //判断其他线程是否还在进行扩容</span><br><span class="line">                if ((sc - 2) != resizeStamp(n) &lt;&lt; RESIZE_STAMP_SHIFT)</span><br><span class="line">                    return;</span><br><span class="line">                    </span><br><span class="line">                //所有线程都完成扩容</span><br><span class="line">                finishing = advance = true;</span><br><span class="line">                </span><br><span class="line">                //由于在退出之前需要再次对所有节点进行一次检查，所有将i再次设置为n，对table再次进行一次遍历</span><br><span class="line">                i = n; // recheck before commit</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        //如果当前桶中没有元素，修改为forwardingNode</span><br><span class="line">        else if ((f = tabAt(tab, i)) == null)</span><br><span class="line">            advance = casTabAt(tab, i, null, fwd);</span><br><span class="line">        //当前桶已经完成扩容，跳过该桶，进入下一个桶</span><br><span class="line">        else if ((fh = f.hash) == MOVED)</span><br><span class="line">            advance = true; // already processed</span><br><span class="line">        //没有进行过扩容操作，将元素从table中移动到nextTable中</span><br><span class="line">        else &#123;</span><br><span class="line">            synchronized (f) &#123;</span><br><span class="line">                if (tabAt(tab, i) == f) &#123;</span><br><span class="line">                    Node&lt;K,V&gt; ln, hn;</span><br><span class="line">                    if (fh &gt;= 0) &#123;</span><br><span class="line">                        int runBit = fh &amp; n;</span><br><span class="line">                        Node&lt;K,V&gt; lastRun = f;</span><br><span class="line">                        for (Node&lt;K,V&gt; p = f.next; p != null; p = p.next) &#123;</span><br><span class="line">                            int b = p.hash &amp; n;</span><br><span class="line">                            if (b != runBit) &#123;</span><br><span class="line">                                runBit = b;</span><br><span class="line">                                lastRun = p;</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                        if (runBit == 0) &#123;</span><br><span class="line">                            ln = lastRun;</span><br><span class="line">                            hn = null;</span><br><span class="line">                        &#125;</span><br><span class="line">                        else &#123;</span><br><span class="line">                            hn = lastRun;</span><br><span class="line">                            ln = null;</span><br><span class="line">                        &#125;</span><br><span class="line">                        for (Node&lt;K,V&gt; p = f; p != lastRun; p = p.next) &#123;</span><br><span class="line">                            int ph = p.hash; K pk = p.key; V pv = p.val;</span><br><span class="line">                            if ((ph &amp; n) == 0)</span><br><span class="line">                                ln = new Node&lt;K,V&gt;(ph, pk, pv, ln);</span><br><span class="line">                            else</span><br><span class="line">                                hn = new Node&lt;K,V&gt;(ph, pk, pv, hn);</span><br><span class="line">                        &#125;</span><br><span class="line">                        setTabAt(nextTab, i, ln);</span><br><span class="line">                        setTabAt(nextTab, i + n, hn);</span><br><span class="line">                        setTabAt(tab, i, fwd);</span><br><span class="line">                        advance = true;</span><br><span class="line">                    &#125;</span><br><span class="line">                    else if (f instanceof TreeBin) &#123;</span><br><span class="line">                        TreeBin&lt;K,V&gt; t = (TreeBin&lt;K,V&gt;)f;</span><br><span class="line">                        TreeNode&lt;K,V&gt; lo = null, loTail = null;</span><br><span class="line">                        TreeNode&lt;K,V&gt; hi = null, hiTail = null;</span><br><span class="line">                        int lc = 0, hc = 0;</span><br><span class="line">                        for (Node&lt;K,V&gt; e = t.first; e != null; e = e.next) &#123;</span><br><span class="line">                            int h = e.hash;</span><br><span class="line">                            TreeNode&lt;K,V&gt; p = new TreeNode&lt;K,V&gt;</span><br><span class="line">                                (h, e.key, e.val, null, null);</span><br><span class="line">                            if ((h &amp; n) == 0) &#123;</span><br><span class="line">                                if ((p.prev = loTail) == null)</span><br><span class="line">                                    lo = p;</span><br><span class="line">                                else</span><br><span class="line">                                    loTail.next = p;</span><br><span class="line">                                loTail = p;</span><br><span class="line">                                ++lc;</span><br><span class="line">                            &#125;</span><br><span class="line">                            else &#123;</span><br><span class="line">                                if ((p.prev = hiTail) == null)</span><br><span class="line">                                    hi = p;</span><br><span class="line">                                else</span><br><span class="line">                                    hiTail.next = p;</span><br><span class="line">                                hiTail = p;</span><br><span class="line">                                ++hc;</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                        ln = (lc &lt;= UNTREEIFY_THRESHOLD) ? untreeify(lo) :</span><br><span class="line">                            (hc != 0) ? new TreeBin&lt;K,V&gt;(lo) : t;</span><br><span class="line">                        hn = (hc &lt;= UNTREEIFY_THRESHOLD) ? untreeify(hi) :</span><br><span class="line">                            (lc != 0) ? new TreeBin&lt;K,V&gt;(hi) : t;</span><br><span class="line">                        setTabAt(nextTab, i, ln);</span><br><span class="line">                        setTabAt(nextTab, i + n, hn);</span><br><span class="line">                        setTabAt(tab, i, fwd);</span><br><span class="line">                        advance = true;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+        </div>
+        
+        <div class="level is-size-7 is-uppercase">
+            <div class="level-start">
+                <div class="level-item">
+                    <span class="is-size-6 has-text-grey has-mr-7">#</span>
+                    <a class="has-link-grey -link" href="/tags/Java/">Java</a>
+                </div>
+            </div>
+        </div>
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev" href="/2018/02/05/rpc/RPC/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">RPC</span>
+            </a>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        
+<div id="comment-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.min.js"></script>
+<script>
+    var gitalk = new Gitalk({
+        clientID: 'cf7aa758f9a4052fbe0f',
+        clientSecret: '28e7b77e22f03e858a36363da98599efc090de9f',
+        id: 'c687bade4c71c40621fc984c4c03b7cc',
+        repo: 'talk',
+        owner: 'jingleWang',
+        admin: "jingleWang"
+    })
+    gitalk.render('comment-container')
+</script>
+
+    </div>
+</div>
+</div>
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered">
+                <div>
+                    
+                        <figure class="image container is-128x128 has-mb-6">
+                            <img class="is-rounded" src="http://pic.jingl.wang/2019-03-02-IMG_3591.jpg" alt="Jinglu Wang">
+                        </figure>
+                    
+                    
+                    <p class="is-size-4 is-block">
+                        Jinglu Wang
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        Everything will be better
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>Hangzhou China</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        7
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        6
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        4
+                    </p>
+                </div>
+            </div>
+        </nav>
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/jingleWang">
+                关注我</a>
+        </div>
+        
+        
+        <div class="level is-mobile">
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Github" href="https://github.com/jingleWang">
+                
+                <i class="fab fa-github"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="weibo" href="https://weibo.com/wjl0225">
+                
+                <i class="fab fa-weibo"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="ins" href="https://www.instagram.com/jinglu.wang/">
+                
+                <i class="fab fa-instagram"></i>
+                
+            </a>
+            
+        </div>
+        
+    </div>
+</div>
+    
+        
+<div class="card widget" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#基本数据结构">
+        <span class="has-mr-6">1</span>
+        <span>基本数据结构</span>
+        </a></li><li>
+        <a class="is-flex" href="#Node类">
+        <span class="has-mr-6">2</span>
+        <span>Node类</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#map中最基本的结构，由4个成员变量组成：">
+        <span class="has-mr-6">2.1</span>
+        <span>map中最基本的结构，由4个成员变量组成：</span>
+        </a></li><li>
+        <a class="is-flex" href="#此外还提供一个方法find方法">
+        <span class="has-mr-6">2.2</span>
+        <span>此外还提供一个方法find方法</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#TreeBin类">
+        <span class="has-mr-6">3</span>
+        <span>TreeBin类</span>
+        </a></li><li>
+        <a class="is-flex" href="#ForwardingNode类型">
+        <span class="has-mr-6">4</span>
+        <span>ForwardingNode类型</span>
+        </a></li><li>
+        <a class="is-flex" href="#put方法">
+        <span class="has-mr-6">5</span>
+        <span>put方法</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#流程">
+        <span class="has-mr-6">5.1</span>
+        <span>流程</span>
+        </a></li><li>
+        <a class="is-flex" href="#源码分析">
+        <span class="has-mr-6">5.2</span>
+        <span>源码分析</span>
+        </a></li><li>
+        <a class="is-flex" href="#initTable方法">
+        <span class="has-mr-6">5.3</span>
+        <span>initTable方法</span>
+        </a></li><li>
+        <a class="is-flex" href="#流程图">
+        <span class="has-mr-6">5.4</span>
+        <span>流程图</span>
+        </a></li><li>
+        <a class="is-flex" href="#源码分析-1">
+        <span class="has-mr-6">5.5</span>
+        <span>源码分析</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#扩容">
+        <span class="has-mr-6">6</span>
+        <span>扩容</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#扩容的触发">
+        <span class="has-mr-6">6.1</span>
+        <span>扩容的触发</span>
+        </a></li><li>
+        <a class="is-flex" href="#扩容的整体思路">
+        <span class="has-mr-6">6.2</span>
+        <span>扩容的整体思路</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#多线程扩容">
+        <span class="has-mr-6">6.2.1</span>
+        <span>多线程扩容</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#代码分析">
+        <span class="has-mr-6">6.3</span>
+        <span>代码分析</span>
+        </a></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+
+    
+        
+
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            链接
+        </h3>
+        <ul class="menu-list">
+        
+            <li>
+                <a class="level is-mobile" href="http://nikan1996.coding.me/" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">Leo Ni</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">nikan1996.coding.me</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="http://zzcoder.cn/" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">zz</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">zzcoder.cn</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="https://zhengchenyang.github.io/" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">zcy</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">zhengchenyang.github.io</span>
+                    </span>
+                </a>
+            </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+
+
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                分类
+            </h3>
+            <ul class="menu-list">
+            <li>
+        <a class="level is-marginless" href="/categories/JVM/">
+            <span class="level-start">
+                <span class="level-item">JVM</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/JVM/内存管理/">
+            <span class="level-start">
+                <span class="level-item">内存管理</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/Java/">
+            <span class="level-start">
+                <span class="level-item">Java</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">5</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/Java/RPC/">
+            <span class="level-start">
+                <span class="level-item">RPC</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/Java/Spring源码/">
+            <span class="level-start">
+                <span class="level-item">Spring源码</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/Java/源码阅读/">
+            <span class="level-start">
+                <span class="level-item">源码阅读</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a></li></ul></li>
+            </ul>
+        </div>
+    </div>
+</div>
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            标签云
+        </h3>
+        <a href="/tags/JVM/" style="font-size: 15px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a>
+    </div>
+</div>
+
+    
+    
+        <div class="column-right-shadow is-hidden-widescreen ">
+        
+            
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2019/04/19/java/HashMap/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2019-04-19-u-1418578175-1769712762%26fm-26%26gp-0.jpg" alt="HashMap源码">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-04-19T06:00:00.000Z">2019-04-19</time></div>
+                    <a href="/2019/04/19/java/HashMap/" class="has-link-black-ter is-size-6">HashMap源码</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/Java/">Java</a> / <a class="has-link-grey -link" href="/categories/Java/源码阅读/">源码阅读</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/12/10/spring/2_Environment/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2019-03-02-DSC_0678.jpg" alt="（二）环境资源管理">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-12-10T09:48:25.000Z">2018-12-10</time></div>
+                    <a href="/2018/12/10/spring/2_Environment/" class="has-link-black-ter is-size-6">（二）环境资源管理</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/Java/">Java</a> / <a class="has-link-grey -link" href="/categories/Java/Spring源码/">Spring源码</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/11/27/spring/1_AbstractApplicationContext/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2019-03-02-150042.png" alt="（一）AbstractApplicationContext分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-11-27T09:48:25.000Z">2018-11-27</time></div>
+                    <a href="/2018/11/27/spring/1_AbstractApplicationContext/" class="has-link-black-ter is-size-6">（一）AbstractApplicationContext分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/Java/">Java</a> / <a class="has-link-grey -link" href="/categories/Java/Spring源码/">Spring源码</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/04/16/jvm/垃圾回收/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2018-08-14-151534.jpg" alt="Java垃圾回收">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-04-16T09:48:25.000Z">2018-04-16</time></div>
+                    <a href="/2018/04/16/jvm/垃圾回收/" class="has-link-black-ter is-size-6">Java垃圾回收</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/JVM/">JVM</a> / <a class="has-link-grey -link" href="/categories/JVM/内存管理/">内存管理</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/04/14/jvm/JavaMemory/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2018-04-15-064544.jpg" alt="Java内存区域">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-04-14T09:48:25.000Z">2018-04-14</time></div>
+                    <a href="/2018/04/14/jvm/JavaMemory/" class="has-link-black-ter is-size-6">Java内存区域</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/JVM/">JVM</a> / <a class="has-link-grey -link" href="/categories/JVM/内存管理/">内存管理</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/12/">
+                <span class="level-start">
+                    <span class="level-item">十二月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/11/">
+                <span class="level-start">
+                    <span class="level-item">十一月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/02/">
+                <span class="level-start">
+                    <span class="level-item">二月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/JVM/">
+                        <span class="tag">JVM</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Java/">
+                        <span class="tag">Java</span>
+                        <span class="tag is-grey">7</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/RPC/">
+                        <span class="tag">RPC</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Spring/">
+                        <span class="tag">Spring</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+        
+        </div>
+    
+</div>
+
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only has-order-3 column-right ">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2019/04/19/java/HashMap/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2019-04-19-u-1418578175-1769712762%26fm-26%26gp-0.jpg" alt="HashMap源码">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-04-19T06:00:00.000Z">2019-04-19</time></div>
+                    <a href="/2019/04/19/java/HashMap/" class="has-link-black-ter is-size-6">HashMap源码</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/Java/">Java</a> / <a class="has-link-grey -link" href="/categories/Java/源码阅读/">源码阅读</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/12/10/spring/2_Environment/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2019-03-02-DSC_0678.jpg" alt="（二）环境资源管理">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-12-10T09:48:25.000Z">2018-12-10</time></div>
+                    <a href="/2018/12/10/spring/2_Environment/" class="has-link-black-ter is-size-6">（二）环境资源管理</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/Java/">Java</a> / <a class="has-link-grey -link" href="/categories/Java/Spring源码/">Spring源码</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/11/27/spring/1_AbstractApplicationContext/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2019-03-02-150042.png" alt="（一）AbstractApplicationContext分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-11-27T09:48:25.000Z">2018-11-27</time></div>
+                    <a href="/2018/11/27/spring/1_AbstractApplicationContext/" class="has-link-black-ter is-size-6">（一）AbstractApplicationContext分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/Java/">Java</a> / <a class="has-link-grey -link" href="/categories/Java/Spring源码/">Spring源码</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/04/16/jvm/垃圾回收/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2018-08-14-151534.jpg" alt="Java垃圾回收">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-04-16T09:48:25.000Z">2018-04-16</time></div>
+                    <a href="/2018/04/16/jvm/垃圾回收/" class="has-link-black-ter is-size-6">Java垃圾回收</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/JVM/">JVM</a> / <a class="has-link-grey -link" href="/categories/JVM/内存管理/">内存管理</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/04/14/jvm/JavaMemory/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2018-04-15-064544.jpg" alt="Java内存区域">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-04-14T09:48:25.000Z">2018-04-14</time></div>
+                    <a href="/2018/04/14/jvm/JavaMemory/" class="has-link-black-ter is-size-6">Java内存区域</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/JVM/">JVM</a> / <a class="has-link-grey -link" href="/categories/JVM/内存管理/">内存管理</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/12/">
+                <span class="level-start">
+                    <span class="level-item">十二月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/11/">
+                <span class="level-start">
+                    <span class="level-item">十一月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/02/">
+                <span class="level-start">
+                    <span class="level-item">二月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/JVM/">
+                        <span class="tag">JVM</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Java/">
+                        <span class="tag">Java</span>
+                        <span class="tag is-grey">7</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/RPC/">
+                        <span class="tag">RPC</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Spring/">
+                        <span class="tag">Spring</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+</div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/jinglu.png" alt="ConcurrentHashMap源码浅析" height="28">
+                
+                </a>
+                <p class="is-size-7">
+                &copy; 2019 Mr. Ben&nbsp;
+                Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> & <a href="http://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                
+                </p>
+            </div>
+            <div class="level-end">
+            
+                <div class="field has-addons is-flex-center-mobile has-mt-5-mobile is-flex-wrap is-flex-middle">
+                
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="weibo" href="https://weibo.com/wjl0225">
+                        
+                        <i class="fab fa-weibo"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="ins" href="https://www.instagram.com/jinglu.wang/">
+                        
+                        <i class="fab fa-instagram"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="GitHub" href="https://github.com/jingleWang">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                </p>
+                
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+
+    
+    
+    
+    <script src="/js/animation.js"></script>
+    
+
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+    <script src="/js/gallery.js" defer></script>
+    
+
+    
+    
+
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+
+    
+    
+
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+    <script src="/js/clipboard.js" defer></script>
+    
+
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么...">
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+</html>

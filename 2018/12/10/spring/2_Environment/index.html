@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+<title>（二）环境资源管理 - Ben&#39;s Blog</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+    <meta name="description" content="spring 中的运行环境通过Environment进行管理。环境分为2种：profile和property。 profile的作用是，在实际开发中，开发环境和实际线上环境的配置是不同的，但是如何能不修改代码就可以让代码在2个不同的环境中运行呢，profile就是用来解决这个问题的，可以为一个bean指定一个或多个profile，当代码运行在不同环境中时，通过配置profile，spring可以知">
+<meta name="keywords" content="Java,Spring">
+<meta property="og:type" content="article">
+<meta property="og:title" content="（二）环境资源管理">
+<meta property="og:url" content="http://yoursite.com/2018/12/10/spring/2_Environment/index.html">
+<meta property="og:site_name" content="Ben&#39;s Blog">
+<meta property="og:description" content="spring 中的运行环境通过Environment进行管理。环境分为2种：profile和property。 profile的作用是，在实际开发中，开发环境和实际线上环境的配置是不同的，但是如何能不修改代码就可以让代码在2个不同的环境中运行呢，profile就是用来解决这个问题的，可以为一个bean指定一个或多个profile，当代码运行在不同环境中时，通过配置profile，spring可以知">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://pic.jingl.wang/2018-12-10-140919.png">
+<meta property="og:image" content="http://pic.jingl.wang/2018-12-10-144354.png">
+<meta property="og:image" content="http://pic.jingl.wang/2018-12-24-142920.png">
+<meta property="og:updated_time" content="2019-03-04T03:01:30.138Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="（二）环境资源管理">
+<meta name="twitter:description" content="spring 中的运行环境通过Environment进行管理。环境分为2种：profile和property。 profile的作用是，在实际开发中，开发环境和实际线上环境的配置是不同的，但是如何能不修改代码就可以让代码在2个不同的环境中运行呢，profile就是用来解决这个问题的，可以为一个bean指定一个或多个profile，当代码运行在不同环境中时，通过配置profile，spring可以知">
+<meta name="twitter:image" content="http://pic.jingl.wang/2018-12-10-140919.png">
+
+
+
+
+
+<link rel="icon" href="/images/logo.png">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css">
+
+
+    
+    
+    
+    <style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+    
+
+    
+    
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+    
+
+    
+    
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+
+    
+    
+    
+    
+
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+
+    
+    
+
+    
+    
+<script>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?5c9a78680a0beac69fe3d9882e30c48e";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+    
+    
+    
+
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/jinglu.png" alt="（二）环境资源管理" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item" href="/">Home</a>
+                
+                <a class="navbar-item" href="/archives">Archives</a>
+                
+                <a class="navbar-item" href="/categories">Categories</a>
+                
+                <a class="navbar-item" href="/tags">Tags</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    
+                    <a class="navbar-item" target="_blank" title="GitHub" href="https://github.com/jingleWang">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main"><div class="card">
+    
+    <div class="card-image">
+        <span class="image is-7by1">
+            <img class="thumbnail" src="http://pic.jingl.wang/2019-03-02-DSC_0678.jpg" alt="（二）环境资源管理">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey" datetime="2018-12-10T09:48:25.000Z">2018-12-10</time>
+                
+                <div class="level-item">
+                <a class="has-link-grey -link" href="/categories/Java/">Java</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/Java/Spring源码/">Spring源码</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    25 分钟 读完 (大约 3747 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+                （二）环境资源管理
+            
+        </h1>
+        <div class="content">
+            <p>spring 中的运行环境通过Environment进行管理。环境分为2种：profile和property。</p>
+<p>profile的作用是，在实际开发中，开发环境和实际线上环境的配置是不同的，但是如何能不修改代码就可以让代码在2个不同的环境中运行呢，profile就是用来解决这个问题的，可以为一个bean指定一个或多个profile，当代码运行在不同环境中时，通过配置profile，spring可以知道是否应该加载这个bean，以此来区分开发环境和正式环境的配置。</p>
+<p>property 即常用的资源配置，这里不多赘述。</p>
+<a id="more"></a>
+<p><img src="http://pic.jingl.wang/2018-12-10-140919.png" alt></p>
+<p>Environment继承自PropertyResolver, PropertyResolver 声明了解析property部分的方法，而Environment本身则在PropertyResolver的基础上，增加了profile部分的方法。</p>
+<p>在Spring中，用Environment主要实现在AbstractEnvironment中，在这里，我将主要对这个类进行分析。在此之前，先来看下Environment和PropertyResolver所声明的方法。</p>
+<h3 id="PropertyResolver"><a href="#PropertyResolver" class="headerlink" title="PropertyResolver"></a>PropertyResolver</h3><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">//property是否存在</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">containsProperty</span><span class="hljs-params">(String key)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="hljs-function">String <span class="hljs-title">getProperty</span><span class="hljs-params">(String key)</span></span>;</span><br><span class="line"><span class="hljs-function">String <span class="hljs-title">getProperty</span><span class="hljs-params">(String key, String defaultValue)</span></span>;</span><br><span class="line">&lt;T&gt; <span class="hljs-function">T <span class="hljs-title">getProperty</span><span class="hljs-params">(String key, Class&lt;T&gt; targetType)</span></span>;</span><br><span class="line">&lt;T&gt; <span class="hljs-function">T <span class="hljs-title">getProperty</span><span class="hljs-params">(String key, Class&lt;T&gt; targetType, T defaultValue)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">//当不存在property时会抛出异常</span></span><br><span class="line"><span class="hljs-function">String <span class="hljs-title">getRequiredProperty</span><span class="hljs-params">(String key)</span> <span class="hljs-keyword">throws</span> IllegalStateException</span>;</span><br><span class="line">&lt;T&gt; <span class="hljs-function">T <span class="hljs-title">getRequiredProperty</span><span class="hljs-params">(String key, Class&lt;T&gt; targetType)</span> <span class="hljs-keyword">throws</span> IllegalStateException</span>;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">//解析字符串中的占位符</span></span><br><span class="line"><span class="hljs-function">String <span class="hljs-title">resolvePlaceholders</span><span class="hljs-params">(String text)</span></span>;</span><br><span class="line"><span class="hljs-function">String <span class="hljs-title">resolveRequiredPlaceholders</span><span class="hljs-params">(String text)</span> <span class="hljs-keyword">throws</span> IllegalArgumentException</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="Environment"><a href="#Environment" class="headerlink" title="Environment"></a>Environment</h3><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">//获得所有活动的profile</span></span><br><span class="line">String[] getActiveProfiles();</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">//当未指定活动profile时 会使用默认的profile</span></span><br><span class="line">String[] getDefaultProfiles();</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">//传入的profile是否是活动的</span></span><br><span class="line"><span class="hljs-meta">@Deprecated</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">acceptsProfiles</span><span class="hljs-params">(String... profiles)</span></span>;</span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">acceptsProfiles</span><span class="hljs-params">(Profiles profiles)</span></span>;</span><br></pre></td></tr></table></figure>
+<h2 id="AbstractEnvironment"><a href="#AbstractEnvironment" class="headerlink" title="AbstractEnvironment"></a>AbstractEnvironment</h2><p>AbstractEnvironment是Environment主要的实现类以下简称AE，所有的实体类都会继承这个类。这个类中，使用了代理模式，将property部分的逻辑，交由<code>PropertySourcesPropertyResolver</code>来实现, 而AbstractEnvironment本身则实现了profile部分的逻辑。首先，先分析一下AbstractEnvironment完整的继承关系。</p>
+<p><img src="http://pic.jingl.wang/2018-12-10-144354.png" alt></p>
+<p>从上图可以看出，AbstractEnvironment并非直接的实现Environment接口，而是继承了ConfigurableEnvironment和ConfigurablePropertyResolver接口。在这连个接口中，提供了一些用于配置的方法，具体如下：</p>
+<h3 id="ConfigurablePropertyResolver"><a href="#ConfigurablePropertyResolver" class="headerlink" title="ConfigurablePropertyResolver"></a>ConfigurablePropertyResolver</h3><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">//获得/设置类型转换器 用于getProperty方法中的类型转换。</span></span><br><span class="line"><span class="hljs-function">ConfigurableConversionService <span class="hljs-title">getConversionService</span><span class="hljs-params">()</span></span>;</span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setConversionService</span><span class="hljs-params">(ConfigurableConversionService conversionService)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">//设置占位符的前后缀 用于处理$&#123;...&#125;</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setPlaceholderPrefix</span><span class="hljs-params">(String placeholderPrefix)</span></span>;</span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setPlaceholderSuffix</span><span class="hljs-params">(String placeholderSuffix)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">//设置占位符中的分隔符， spring默认的是":"，当需要默认值时，只需写成$&#123;key:defaultVal&#125;即可</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setValueSeparator</span><span class="hljs-params">(@Nullable String valueSeparator)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">//是否不处理嵌套的占位符</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setIgnoreUnresolvableNestedPlaceholders</span><span class="hljs-params">(<span class="hljs-keyword">boolean</span> ignoreUnresolvableNestedPlaceholders)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">//当进行property验证时，必须验证的property</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setRequiredProperties</span><span class="hljs-params">(String... requiredProperties)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">//验证setRequiredProperties方法设置的property是否存在且合法</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">validateRequiredProperties</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> MissingRequiredPropertiesException</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="ConfigurableEnvironment"><a href="#ConfigurableEnvironment" class="headerlink" title="ConfigurableEnvironment"></a>ConfigurableEnvironment</h3><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">//清空set重新添加活动的profile</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setActiveProfiles</span><span class="hljs-params">(String... profiles)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">//在原有的基础上增加活动profile</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">addActiveProfile</span><span class="hljs-params">(String profile)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">//设置默认profile</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setDefaultProfiles</span><span class="hljs-params">(String... profiles)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">//获得PropertySources, PropertySource是时间用来存储property的地方</span></span><br><span class="line"><span class="hljs-function">MutablePropertySources <span class="hljs-title">getPropertySources</span><span class="hljs-params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">//获取系统property</span></span><br><span class="line"><span class="hljs-function">Map&lt;String, Object&gt; <span class="hljs-title">getSystemProperties</span><span class="hljs-params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">//获取系统环境</span></span><br><span class="line"><span class="hljs-function">Map&lt;String, Object&gt; <span class="hljs-title">getSystemEnvironment</span><span class="hljs-params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">//合并其他Environment的profile 和 Environment</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">merge</span><span class="hljs-params">(ConfigurableEnvironment parent)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>以上就是AbstractEnvironment提供的所有方法，接下来，看一下他们是如何实现的。</p>
+<p>首先，先看看AE的成员变量：</p>
+<figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">private final Set&lt;String&gt; activeProfiles = new LinkedHashSet&lt;&gt;();	//活动的profile set</span><br><span class="line"></span><br><span class="line">//默认profile的set 如果指定则为&#123;&quot;default&quot;&#125;</span><br><span class="line">private final Set&lt;String&gt; defaultProfiles = new LinkedHashSet&lt;&gt;(getReservedDefaultProfiles());</span><br><span class="line"></span><br><span class="line">//一个用于存放的PropertySource的集合</span><br><span class="line">private final MutablePropertySources propertySources = new MutablePropertySources();</span><br><span class="line"></span><br><span class="line">//上面说到的代理的用于实现property部分逻辑的实现类</span><br><span class="line">private final ConfigurablePropertyResolver propertyResolver =</span><br><span class="line">      new PropertySourcesPropertyResolver(this.propertySources);</span><br></pre></td></tr></table></figure>
+<p>在这里需要简单提一下<code>MutablePropertySources</code>这个类。它实际上是一个PropertySource的集合，内部维护了一个List&lt;PropertySource&lt;?&gt;&gt;, 它实现PropertySources接口，而PropertySources又是继承自Iterable&lt;PropertySource&lt;?&gt;&gt;的。在上面代码中其实是建了一个空的PropertySource集合。那么PropertySource又是什么东西呢。从名字上看，就是property的源的意思，所有的property都是从这里获取，是用来存放property的地方。</p>
+<p>AE只提供了一个无参的构造方法：</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">AbstractEnvironment</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">   customizePropertySources(<span class="hljs-keyword">this</span>.propertySources);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">/**</span></span><br><span class="line"><span class="hljs-comment"> * Customize the set of &#123;<span class="hljs-doctag">@link</span> PropertySource&#125; objects to be searched by this</span></span><br><span class="line"><span class="hljs-comment"> * &#123;<span class="hljs-doctag">@code</span> Environment&#125; during calls to &#123;<span class="hljs-doctag">@link</span> #getProperty(String)&#125; and related</span></span><br><span class="line"><span class="hljs-comment"> * methods.</span></span><br><span class="line"><span class="hljs-comment"> *</span></span><br><span class="line"><span class="hljs-comment"> * &lt;p&gt;Subclasses that override this method are encouraged to add property</span></span><br><span class="line"><span class="hljs-comment"> * sources using &#123;<span class="hljs-doctag">@link</span> MutablePropertySources#addLast(PropertySource)&#125; such that</span></span><br><span class="line"><span class="hljs-comment"> * further subclasses may call &#123;<span class="hljs-doctag">@code</span> super.customizePropertySources()&#125; with</span></span><br><span class="line"><span class="hljs-comment"> * predictable results. For example:</span></span><br><span class="line"><span class="hljs-comment"> * &lt;pre class="code"&gt;</span></span><br><span class="line"><span class="hljs-comment"> * public class Level1Environment extends AbstractEnvironment &#123;</span></span><br><span class="line"><span class="hljs-comment"> *     &amp;#064;Override</span></span><br><span class="line"><span class="hljs-comment"> *     protected void customizePropertySources(MutablePropertySources propertySources) &#123;</span></span><br><span class="line"><span class="hljs-comment"> *         super.customizePropertySources(propertySources); // no-op from base class</span></span><br><span class="line"><span class="hljs-comment"> *         propertySources.addLast(new PropertySourceA(...));</span></span><br><span class="line"><span class="hljs-comment"> *         propertySources.addLast(new PropertySourceB(...));</span></span><br><span class="line"><span class="hljs-comment"> *     &#125;</span></span><br><span class="line"><span class="hljs-comment"> * &#125;</span></span><br><span class="line"><span class="hljs-comment"> *</span></span><br><span class="line"><span class="hljs-comment"> * public class Level2Environment extends Level1Environment &#123;</span></span><br><span class="line"><span class="hljs-comment"> *     &amp;#064;Override</span></span><br><span class="line"><span class="hljs-comment"> *     protected void customizePropertySources(MutablePropertySources propertySources) &#123;</span></span><br><span class="line"><span class="hljs-comment"> *         super.customizePropertySources(propertySources); // add all from superclass</span></span><br><span class="line"><span class="hljs-comment"> *         propertySources.addLast(new PropertySourceC(...));</span></span><br><span class="line"><span class="hljs-comment"> *         propertySources.addLast(new PropertySourceD(...));</span></span><br><span class="line"><span class="hljs-comment"> *     &#125;</span></span><br><span class="line"><span class="hljs-comment"> * &#125;</span></span><br><span class="line"><span class="hljs-comment"> * &lt;/pre&gt;</span></span><br><span class="line"><span class="hljs-comment"> * In this arrangement, properties will be resolved against sources A, B, C, D in that</span></span><br><span class="line"><span class="hljs-comment"> * order. That is to say that property source "A" has precedence over property source</span></span><br><span class="line"><span class="hljs-comment"> * "D". If the &#123;<span class="hljs-doctag">@code</span> Level2Environment&#125; subclass wished to give property sources C</span></span><br><span class="line"><span class="hljs-comment"> * and D higher precedence than A and B, it could simply call</span></span><br><span class="line"><span class="hljs-comment"> * &#123;<span class="hljs-doctag">@code</span> super.customizePropertySources&#125; after, rather than before adding its own:</span></span><br><span class="line"><span class="hljs-comment"> * &lt;pre class="code"&gt;</span></span><br><span class="line"><span class="hljs-comment"> * public class Level2Environment extends Level1Environment &#123;</span></span><br><span class="line"><span class="hljs-comment"> *     &amp;#064;Override</span></span><br><span class="line"><span class="hljs-comment"> *     protected void customizePropertySources(MutablePropertySources propertySources) &#123;</span></span><br><span class="line"><span class="hljs-comment"> *         propertySources.addLast(new PropertySourceC(...));</span></span><br><span class="line"><span class="hljs-comment"> *         propertySources.addLast(new PropertySourceD(...));</span></span><br><span class="line"><span class="hljs-comment"> *         super.customizePropertySources(propertySources); // add all from superclass</span></span><br><span class="line"><span class="hljs-comment"> *     &#125;</span></span><br><span class="line"><span class="hljs-comment"> * &#125;</span></span><br><span class="line"><span class="hljs-comment"> * &lt;/pre&gt;</span></span><br><span class="line"><span class="hljs-comment"> * The search order is now C, D, A, B as desired.</span></span><br><span class="line"><span class="hljs-comment"> *</span></span><br><span class="line"><span class="hljs-comment"> * &lt;p&gt;Beyond these recommendations, subclasses may use any of the &#123;<span class="hljs-doctag">@code</span> add&amp;#42;&#125;,</span></span><br><span class="line"><span class="hljs-comment"> * &#123;<span class="hljs-doctag">@code</span> remove&#125;, or &#123;<span class="hljs-doctag">@code</span> replace&#125; methods exposed by &#123;<span class="hljs-doctag">@link</span> MutablePropertySources&#125;</span></span><br><span class="line"><span class="hljs-comment"> * in order to create the exact arrangement of property sources desired.</span></span><br><span class="line"><span class="hljs-comment"> *</span></span><br><span class="line"><span class="hljs-comment"> * &lt;p&gt;The base implementation registers no property sources.</span></span><br><span class="line"><span class="hljs-comment"> *</span></span><br><span class="line"><span class="hljs-comment"> * &lt;p&gt;Note that clients of any &#123;<span class="hljs-doctag">@link</span> ConfigurableEnvironment&#125; may further customize</span></span><br><span class="line"><span class="hljs-comment"> * property sources via the &#123;<span class="hljs-doctag">@link</span> #getPropertySources()&#125; accessor, typically within</span></span><br><span class="line"><span class="hljs-comment"> * an &#123;<span class="hljs-doctag">@link</span> org.springframework.context.ApplicationContextInitializer</span></span><br><span class="line"><span class="hljs-comment"> * ApplicationContextInitializer&#125;. For example:</span></span><br><span class="line"><span class="hljs-comment"> * &lt;pre class="code"&gt;</span></span><br><span class="line"><span class="hljs-comment"> * ConfigurableEnvironment env = new StandardEnvironment();</span></span><br><span class="line"><span class="hljs-comment"> * env.getPropertySources().addLast(new PropertySourceX(...));</span></span><br><span class="line"><span class="hljs-comment"> * &lt;/pre&gt;</span></span><br><span class="line"><span class="hljs-comment"> *</span></span><br><span class="line"><span class="hljs-comment"> * &lt;h2&gt;A warning about instance variable access&lt;/h2&gt;</span></span><br><span class="line"><span class="hljs-comment"> * Instance variables declared in subclasses and having default initial values should</span></span><br><span class="line"><span class="hljs-comment"> * &lt;em&gt;not&lt;/em&gt; be accessed from within this method. Due to Java object creation</span></span><br><span class="line"><span class="hljs-comment"> * lifecycle constraints, any initial value will not yet be assigned when this</span></span><br><span class="line"><span class="hljs-comment"> * callback is invoked by the &#123;<span class="hljs-doctag">@link</span> #AbstractEnvironment()&#125; constructor, which may</span></span><br><span class="line"><span class="hljs-comment"> * lead to a &#123;<span class="hljs-doctag">@code</span> NullPointerException&#125; or other problems. If you need to access</span></span><br><span class="line"><span class="hljs-comment"> * default values of instance variables, leave this method as a no-op and perform</span></span><br><span class="line"><span class="hljs-comment"> * property source manipulation and instance variable access directly within the</span></span><br><span class="line"><span class="hljs-comment"> * subclass constructor. Note that &lt;em&gt;assigning&lt;/em&gt; values to instance variables is</span></span><br><span class="line"><span class="hljs-comment"> * not problematic; it is only attempting to read default values that must be avoided.</span></span><br><span class="line"><span class="hljs-comment"> *</span></span><br><span class="line"><span class="hljs-comment"> * <span class="hljs-doctag">@see</span> MutablePropertySources</span></span><br><span class="line"><span class="hljs-comment"> * <span class="hljs-doctag">@see</span> PropertySourcesPropertyResolver</span></span><br><span class="line"><span class="hljs-comment"> * <span class="hljs-doctag">@see</span> org.springframework.context.ApplicationContextInitializer</span></span><br><span class="line"><span class="hljs-comment"> */</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">customizePropertySources</span><span class="hljs-params">(MutablePropertySources propertySources)</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在构造方法中，它将会调用customizePropertySources方法，在AE中，其实并没有对这个方法进行实现。需要在子类中重新这个类。而这个方法的主要目的是让子类在其中添加一些PropertySource, 如StandardEnvironment中是如下实现的。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">customizePropertySources</span><span class="hljs-params">(MutablePropertySources propertySources)</span> </span>&#123;</span><br><span class="line">   propertySources.addLast(<span class="hljs-keyword">new</span> MapPropertySource(SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, getSystemProperties()));</span><br><span class="line">   propertySources.addLast(<span class="hljs-keyword">new</span> SystemEnvironmentPropertySource(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, getSystemEnvironment()));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>分析完了构造方法，接下来理一理成员方法的实现。同样的分为2个部分，profile和property，profile部分实现了单纯在Environment中和ConfigurableEnvironment中声明的方法。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">public</span> String[] getActiveProfiles() &#123;</span><br><span class="line">   <span class="hljs-keyword">return</span> StringUtils.toStringArray(doGetActiveProfiles());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">/**</span></span><br><span class="line"><span class="hljs-comment"> * Return the set of active profiles as explicitly set through</span></span><br><span class="line"><span class="hljs-comment"> * &#123;<span class="hljs-doctag">@link</span> #setActiveProfiles&#125; or if the current set of active profiles</span></span><br><span class="line"><span class="hljs-comment"> * is empty, check for the presence of the &#123;<span class="hljs-doctag">@value</span> #ACTIVE_PROFILES_PROPERTY_NAME&#125;</span></span><br><span class="line"><span class="hljs-comment"> * property and assign its value to the set of active profiles.</span></span><br><span class="line"><span class="hljs-comment"> * <span class="hljs-doctag">@see</span> #getActiveProfiles()</span></span><br><span class="line"><span class="hljs-comment"> * <span class="hljs-doctag">@see</span> #ACTIVE_PROFILES_PROPERTY_NAME</span></span><br><span class="line"><span class="hljs-comment"> */</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> Set&lt;String&gt; <span class="hljs-title">doGetActiveProfiles</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">   <span class="hljs-keyword">synchronized</span> (<span class="hljs-keyword">this</span>.activeProfiles) &#123;</span><br><span class="line">      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.activeProfiles.isEmpty()) &#123;</span><br><span class="line">         String profiles = getProperty(ACTIVE_PROFILES_PROPERTY_NAME);</span><br><span class="line">         <span class="hljs-keyword">if</span> (StringUtils.hasText(profiles)) &#123;</span><br><span class="line">            setActiveProfiles(StringUtils.commaDelimitedListToStringArray(</span><br><span class="line">                  StringUtils.trimAllWhitespace(profiles)));</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.activeProfiles;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>getActiveProfiles<code>方法是用来获得活动profile的，活动profile的获取是懒加载的，当第一次需要获得活动profile时，会通过</code>doGetActiveProfiles`方法，从property中进行加载，这个过程通过对activeProfiles进行加锁，保证了线程安全性。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">@Override</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setActiveProfiles</span><span class="hljs-params">(String... profiles)</span> </span>&#123;</span><br><span class="line">   Assert.notNull(profiles, <span class="hljs-string">"Profile array must not be null"</span>);</span><br><span class="line">   <span class="hljs-keyword">if</span> (logger.isDebugEnabled()) &#123;</span><br><span class="line">      logger.debug(<span class="hljs-string">"Activating profiles "</span> + Arrays.asList(profiles));</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="hljs-keyword">synchronized</span> (<span class="hljs-keyword">this</span>.activeProfiles) &#123;</span><br><span class="line">      <span class="hljs-keyword">this</span>.activeProfiles.clear();</span><br><span class="line">      <span class="hljs-keyword">for</span> (String profile : profiles) &#123;</span><br><span class="line">         validateProfile(profile); <span class="hljs-comment">//判断profile是否合法 (不为空， 不以！开头)</span></span><br><span class="line">         <span class="hljs-keyword">this</span>.activeProfiles.add(profile);</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-meta">@Override</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">addActiveProfile</span><span class="hljs-params">(String profile)</span> </span>&#123;</span><br><span class="line">   <span class="hljs-keyword">if</span> (logger.isDebugEnabled()) &#123;</span><br><span class="line">      logger.debug(<span class="hljs-string">"Activating profile '"</span> + profile + <span class="hljs-string">"'"</span>);</span><br><span class="line">   &#125;</span><br><span class="line">   validateProfile(profile);</span><br><span class="line">   doGetActiveProfiles();</span><br><span class="line">   <span class="hljs-keyword">synchronized</span> (<span class="hljs-keyword">this</span>.activeProfiles) &#123;</span><br><span class="line">      <span class="hljs-keyword">this</span>.activeProfiles.add(profile);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面这两个方法是用来添加活动的profile的，区别是set方法是会清空原有的activeProfiles，而add方法只是追加，通样这两个方法都是线程安全的。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">@Override</span></span><br><span class="line"><span class="hljs-keyword">public</span> String[] getDefaultProfiles() &#123;</span><br><span class="line">   <span class="hljs-keyword">return</span> StringUtils.toStringArray(doGetDefaultProfiles());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">/**</span></span><br><span class="line"><span class="hljs-comment"> * Return the set of default profiles explicitly set via</span></span><br><span class="line"><span class="hljs-comment"> * &#123;<span class="hljs-doctag">@link</span> #setDefaultProfiles(String...)&#125; or if the current set of default profiles</span></span><br><span class="line"><span class="hljs-comment"> * consists only of &#123;<span class="hljs-doctag">@linkplain</span> #getReservedDefaultProfiles() reserved default</span></span><br><span class="line"><span class="hljs-comment"> * profiles&#125;, then check for the presence of the</span></span><br><span class="line"><span class="hljs-comment"> * &#123;<span class="hljs-doctag">@value</span> #DEFAULT_PROFILES_PROPERTY_NAME&#125; property and assign its value (if any)</span></span><br><span class="line"><span class="hljs-comment"> * to the set of default profiles.</span></span><br><span class="line"><span class="hljs-comment"> * <span class="hljs-doctag">@see</span> #AbstractEnvironment()</span></span><br><span class="line"><span class="hljs-comment"> * <span class="hljs-doctag">@see</span> #getDefaultProfiles()</span></span><br><span class="line"><span class="hljs-comment"> * <span class="hljs-doctag">@see</span> #DEFAULT_PROFILES_PROPERTY_NAME</span></span><br><span class="line"><span class="hljs-comment"> * <span class="hljs-doctag">@see</span> #getReservedDefaultProfiles()</span></span><br><span class="line"><span class="hljs-comment"> */</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> Set&lt;String&gt; <span class="hljs-title">doGetDefaultProfiles</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">   <span class="hljs-keyword">synchronized</span> (<span class="hljs-keyword">this</span>.defaultProfiles) &#123;</span><br><span class="line">      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.defaultProfiles.equals(getReservedDefaultProfiles())) &#123;</span><br><span class="line">         <span class="hljs-comment">//检查是否配置spring.profiles.default， 如果是则使用配置的profile作为默认profile</span></span><br><span class="line">         String profiles = getProperty(DEFAULT_PROFILES_PROPERTY_NAME);</span><br><span class="line">         <span class="hljs-keyword">if</span> (StringUtils.hasText(profiles)) &#123;</span><br><span class="line">            setDefaultProfiles(StringUtils.commaDelimitedListToStringArray(</span><br><span class="line">                  StringUtils.trimAllWhitespace(profiles)));</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.defaultProfiles;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">/**</span></span><br><span class="line"><span class="hljs-comment">* Specify the set of profiles to be made active by default if no other profiles</span></span><br><span class="line"><span class="hljs-comment">* are explicitly made active through &#123;<span class="hljs-doctag">@link</span> #setActiveProfiles&#125;.</span></span><br><span class="line"><span class="hljs-comment">* &lt;p&gt;Calling this method removes overrides any reserved default profiles</span></span><br><span class="line"><span class="hljs-comment">* that may have been added during construction of the environment.</span></span><br><span class="line"><span class="hljs-comment">* <span class="hljs-doctag">@see</span> #AbstractEnvironment()</span></span><br><span class="line"><span class="hljs-comment">* <span class="hljs-doctag">@see</span> #getReservedDefaultProfiles()</span></span><br><span class="line"><span class="hljs-comment">*/</span></span><br><span class="line"><span class="hljs-meta">@Override</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setDefaultProfiles</span><span class="hljs-params">(String... profiles)</span> </span>&#123;</span><br><span class="line">	Assert.notNull(profiles, <span class="hljs-string">"Profile array must not be null"</span>);</span><br><span class="line">	<span class="hljs-keyword">synchronized</span> (<span class="hljs-keyword">this</span>.defaultProfiles) &#123;</span><br><span class="line">	<span class="hljs-keyword">this</span>.defaultProfiles.clear();	<span class="hljs-comment">//清除default</span></span><br><span class="line">	validateProfile(profile);	<span class="hljs-comment">//验证profile，如果为空或者以!开头则抛出异常IllegalArgumentException</span></span><br><span class="line">	<span class="hljs-keyword">this</span>.defaultProfiles.add(profile);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>getDefaultProfiles</code> 方法和<code>getActiveProfiles</code>方法类似，当用户没有自定义default profile时， 则会返回default作为默认profile。<code>setDefaultProfiles</code>方法也基本和<code>setActiveProfiles</code>类似，不多赘述。</p>
+<figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">@Deprecated</span><br><span class="line">public boolean acceptsProfiles(String... profiles) &#123;</span><br><span class="line">   Assert.notEmpty(profiles, &quot;Must specify at least one profile&quot;);</span><br><span class="line">   for (String profile : profiles) &#123;</span><br><span class="line">      if (StringUtils.hasLength(profile) &amp;&amp; profile.charAt(0) == &apos;!&apos;) &#123;</span><br><span class="line">         if (!isProfileActive(profile.substring(1))) &#123;</span><br><span class="line">            return true;</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      else if (isProfileActive(profile)) &#123;</span><br><span class="line">         return true;</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   return false;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">public boolean acceptsProfiles(Profiles profiles) &#123;</span><br><span class="line">   Assert.notNull(profiles, &quot;Profiles must not be null&quot;);</span><br><span class="line">   return profiles.matches(this::isProfileActive);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * Return whether the given profile is active, or if active profiles are empty</span><br><span class="line"> * whether the profile should be active by default.</span><br><span class="line"> * @throws IllegalArgumentException per &#123;@link #validateProfile(String)&#125;</span><br><span class="line"> */</span><br><span class="line">protected boolean isProfileActive(String profile) &#123;</span><br><span class="line">   validateProfile(profile);</span><br><span class="line">   Set&lt;String&gt; currentActiveProfiles = doGetActiveProfiles();</span><br><span class="line">   return (currentActiveProfiles.contains(profile) ||</span><br><span class="line">         (currentActiveProfiles.isEmpty() &amp;&amp; doGetDefaultProfiles().contains(profile)));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接下来是2个判断profile是否活跃的方法，前一个方法已经启用，但是2者实现的原理都是一样的，在activeProfiles和defaultProfiles中是否存在那个profile。</p>
+<p>最后来看一下merge方法，merge方法用于将一个父环境中注册的propertySource和profile注册到当前环境中。同样这个方法是线程安全的。</p>
+<figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public void merge(ConfigurableEnvironment parent) &#123;</span><br><span class="line">   for (PropertySource&lt;?&gt; ps : parent.getPropertySources()) &#123;</span><br><span class="line">      if (!this.propertySources.contains(ps.getName())) &#123;</span><br><span class="line">         this.propertySources.addLast(ps);</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   String[] parentActiveProfiles = parent.getActiveProfiles();</span><br><span class="line">   if (!ObjectUtils.isEmpty(parentActiveProfiles)) &#123;</span><br><span class="line">      synchronized (this.activeProfiles) &#123;</span><br><span class="line">         for (String profile : parentActiveProfiles) &#123;</span><br><span class="line">            this.activeProfiles.add(profile);</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   String[] parentDefaultProfiles = parent.getDefaultProfiles();</span><br><span class="line">   if (!ObjectUtils.isEmpty(parentDefaultProfiles)) &#123;</span><br><span class="line">      synchronized (this.defaultProfiles) &#123;</span><br><span class="line">         this.defaultProfiles.remove(RESERVED_DEFAULT_PROFILE_NAME);</span><br><span class="line">         for (String profile : parentDefaultProfiles) &#123;</span><br><span class="line">            this.defaultProfiles.add(profile);</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上，profil部分的实现已经全部分析完了，接下来在对property部分的实现进行分析，之前说了AE是将这部分的逻辑代理到了<code>PropertySourcesPropertyResolver</code>这个类中，所以我将直接对这个类进行分析。</p>
+<p><img src="http://pic.jingl.wang/2018-12-24-142920.png" alt></p>
+<p>对于<code>PropertyResovler</code>的逻辑，主要是放在了<code>AbstractPropertyResolver</code>中，PropertyResolver提供的方法，可以分为这么几类：</p>
+<ul>
+<li>property的获取</li>
+<li>字符串中property占位符的解析替换</li>
+<li>其他的set配置方法</li>
+</ul>
+<p>所有的set配置方法，字符串解析的方法都在APR中实现，一部分property在APR中实现，但其最核心的获取操作实现在了<code>PropertySourcesPropertyResolver</code>中。</p>
+<p>首先还是看一下APR的成员变量。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">@Nullable</span></span><br><span class="line"><span class="hljs-keyword">private</span> <span class="hljs-keyword">volatile</span> ConfigurableConversionService conversionService;</span><br><span class="line"></span><br><span class="line"><span class="hljs-meta">@Nullable</span></span><br><span class="line"><span class="hljs-keyword">private</span> PropertyPlaceholderHelper nonStrictHelper;</span><br><span class="line"></span><br><span class="line"><span class="hljs-meta">@Nullable</span></span><br><span class="line"><span class="hljs-keyword">private</span> PropertyPlaceholderHelper strictHelper;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">private</span> <span class="hljs-keyword">boolean</span> ignoreUnresolvableNestedPlaceholders = <span class="hljs-keyword">false</span>;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">private</span> String placeholderPrefix = SystemPropertyUtils.PLACEHOLDER_PREFIX;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">private</span> String placeholderSuffix = SystemPropertyUtils.PLACEHOLDER_SUFFIX;</span><br><span class="line"></span><br><span class="line"><span class="hljs-meta">@Nullable</span></span><br><span class="line"><span class="hljs-keyword">private</span> String valueSeparator = SystemPropertyUtils.VALUE_SEPARATOR;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Set&lt;String&gt; requiredProperties = <span class="hljs-keyword">new</span> LinkedHashSet&lt;&gt;();</span><br></pre></td></tr></table></figure>
+<p>第一个变量<code>conversionService</code> 是用来作类型转换的，可以将property通过这个服务把类型转换为目标类型；</p>
+<p>第二第三个变量都是<code>PropertyPlaceholderHelper</code>类型的，他们是用来解析字符串中的property, 在这里有严格和非严格的资源占位符解析，如果是严格的，当无法找到相应资源时，将会抛出异常，如果是非严格的，则会将那个占位符替换为空字符串， 他们都是懒加载的。</p>
+<p>第四个变量<code>ignoreUnresolvableNestedPlaceholders</code> 是一个布尔类型的配置变量，通过设置这个变量，可以选择是否忽略嵌套的无法解析的占位符；</p>
+<p>第五第六个变量用来指定占位符的前缀和后缀，比如<code>${...}</code>;</p>
+<p>第七个<code>valueSeparator</code>变量用来分隔占位符中，property的key和默认值，如<code>${key:defaultVal}</code>中的<code>:</code>;</p>
+<p>最后一个变量是一个set容器，用来存放调用<code>validateRequiredProperties</code>时，必须存在的资源名称。</p>
+<p>对于set方法，这里就不多做说明了，着重来看一下getProperty和resolvePlaceholder系列方法。</p>
+<p>对于getProperty类方法，都是依赖<code>PropertySourcesPropertyResolver</code>中的<code>getProperty(String key, Class&lt;T&gt; targetValueType, boolean resolveNestedPlaceholders)</code>方法，所以这里只需要分析这个方法即可。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">protected</span> &lt;T&gt; <span class="hljs-function">T <span class="hljs-title">getProperty</span><span class="hljs-params">(String key, Class&lt;T&gt; targetValueType, <span class="hljs-keyword">boolean</span> resolveNestedPlaceholders)</span> </span>&#123;</span><br><span class="line">   <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.propertySources != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">      <span class="hljs-keyword">for</span> (PropertySource&lt;?&gt; propertySource : <span class="hljs-keyword">this</span>.propertySources) &#123;</span><br><span class="line">         <span class="hljs-comment">//依次在注册的propertySource总寻找</span></span><br><span class="line">         <span class="hljs-keyword">if</span> (logger.isTraceEnabled()) &#123;</span><br><span class="line">            logger.trace(<span class="hljs-string">"Searching for key '"</span> + key + <span class="hljs-string">"' in PropertySource '"</span> +</span><br><span class="line">                  propertySource.getName() + <span class="hljs-string">"'"</span>);</span><br><span class="line">         &#125;</span><br><span class="line">         Object value = propertySource.getProperty(key);</span><br><span class="line">         <span class="hljs-keyword">if</span> (value != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">            <span class="hljs-keyword">if</span> (resolveNestedPlaceholders &amp;&amp; value <span class="hljs-keyword">instanceof</span> String) &#123;</span><br><span class="line">               <span class="hljs-comment">//解析嵌套placeholder</span></span><br><span class="line">               value = resolveNestedPlaceholders((String) value);</span><br><span class="line">            &#125;</span><br><span class="line">            logKeyFound(key, propertySource, value);</span><br><span class="line">            <span class="hljs-keyword">return</span> convertValueIfNecessary(value, targetValueType);       <span class="hljs-comment">//类型转换</span></span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="hljs-keyword">if</span> (logger.isTraceEnabled()) &#123;</span><br><span class="line">      logger.trace(<span class="hljs-string">"Could not find key '"</span> + key + <span class="hljs-string">"' in any property source"</span>);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>他的逻辑其实非常的简单，依次在所有propertySource中寻找这个property，当找到这个property时，会通过resolveNestedPlaceholders这个方法处理value中嵌套的资源占位符，最后，调用<code>convertValueIfNecessary</code>方法通过ConversionService转换为目标类型。</p>
+<p>对字符串中资源占位符的解析，是在<code>PropertyPlaceholderHelper</code> 中完成的，来看下这部分的逻辑：</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> String <span class="hljs-title">parseStringValue</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">      String value, PlaceholderResolver placeholderResolver, Set&lt;String&gt; visitedPlaceholders)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   StringBuilder result = <span class="hljs-keyword">new</span> StringBuilder(value);</span><br><span class="line"></span><br><span class="line">   <span class="hljs-keyword">int</span> startIndex = value.indexOf(<span class="hljs-keyword">this</span>.placeholderPrefix); <span class="hljs-comment">//寻找第一个$&#123;前缀</span></span><br><span class="line">   <span class="hljs-keyword">while</span> (startIndex != -<span class="hljs-number">1</span>) &#123; <span class="hljs-comment">//存在占位符，则进行处理</span></span><br><span class="line">      <span class="hljs-keyword">int</span> endIndex = findPlaceholderEndIndex(result, startIndex);</span><br><span class="line">      <span class="hljs-keyword">if</span> (endIndex != -<span class="hljs-number">1</span>) &#123;</span><br><span class="line">         String placeholder = result.substring(startIndex + <span class="hljs-keyword">this</span>.placeholderPrefix.length(), endIndex); <span class="hljs-comment">//拿出占位符key</span></span><br><span class="line">         String originalPlaceholder = placeholder;</span><br><span class="line">         <span class="hljs-keyword">if</span> (!visitedPlaceholders.add(originalPlaceholder)) &#123;   <span class="hljs-comment">//判断是否存在循环引用的情况 即 placeholder=$&#123;placeholder&#125;</span></span><br><span class="line">            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(</span><br><span class="line">                  <span class="hljs-string">"Circular placeholder reference '"</span> + originalPlaceholder + <span class="hljs-string">"' in property definitions"</span>);</span><br><span class="line">         &#125;</span><br><span class="line">         <span class="hljs-comment">// Recursive invocation, parsing placeholders contained in the placeholder key.</span></span><br><span class="line">         placeholder = parseStringValue(placeholder, placeholderResolver, visitedPlaceholders); <span class="hljs-comment">//处理placeholder中嵌套的占位符，获得真正的key 如#&#123;#&#123;key&#125;&#125;</span></span><br><span class="line">         <span class="hljs-comment">// Now obtain the value for the fully resolved key...</span></span><br><span class="line">         String propVal = placeholderResolver.resolvePlaceholder(placeholder);  <span class="hljs-comment">//尝试获得最终占位符锁对应的值</span></span><br><span class="line">         <span class="hljs-keyword">if</span> (propVal == <span class="hljs-keyword">null</span> &amp;&amp; <span class="hljs-keyword">this</span>.valueSeparator != <span class="hljs-keyword">null</span>) &#123;  <span class="hljs-comment">//没有找到placeholder对应的值，则可能出现存在默认值得情况 如#&#123;key:defaultVal&#125;</span></span><br><span class="line">            <span class="hljs-keyword">int</span> separatorIndex = placeholder.indexOf(<span class="hljs-keyword">this</span>.valueSeparator); <span class="hljs-comment">//查找字符串中的分隔符。</span></span><br><span class="line">            <span class="hljs-keyword">if</span> (separatorIndex != -<span class="hljs-number">1</span>) &#123;</span><br><span class="line">               <span class="hljs-comment">//存在分隔符，则在尝试用真实key寻找对应值，如果不存在则使用默认值</span></span><br><span class="line">               String actualPlaceholder = placeholder.substring(<span class="hljs-number">0</span>, separatorIndex);</span><br><span class="line">               String  defaultValue = placeholder.substring(separatorIndex + <span class="hljs-keyword">this</span>.valueSeparator.length());</span><br><span class="line">               propVal = placeholderResolver.resolvePlaceholder(actualPlaceholder);</span><br><span class="line">               <span class="hljs-keyword">if</span> (propVal == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">                  propVal = defaultValue;</span><br><span class="line">               &#125;</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;</span><br><span class="line">         <span class="hljs-keyword">if</span> (propVal != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">            <span class="hljs-comment">// Recursive invocation, parsing placeholders contained in the</span></span><br><span class="line">            <span class="hljs-comment">// previously resolved placeholder value.</span></span><br><span class="line">            <span class="hljs-comment">//当找到placeholder对应的值后，需要在对这个值中嵌套的placeholder进行处理,进行递归调用</span></span><br><span class="line">            propVal = parseStringValue(propVal, placeholderResolver, visitedPlaceholders);</span><br><span class="line"></span><br><span class="line">            <span class="hljs-comment">//替换placeholder</span></span><br><span class="line">            result.replace(startIndex, endIndex + <span class="hljs-keyword">this</span>.placeholderSuffix.length(), propVal);</span><br><span class="line">            <span class="hljs-keyword">if</span> (logger.isTraceEnabled()) &#123;</span><br><span class="line">               logger.trace(<span class="hljs-string">"Resolved placeholder '"</span> + placeholder + <span class="hljs-string">"'"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            startIndex = result.indexOf(<span class="hljs-keyword">this</span>.placeholderPrefix, startIndex + propVal.length());</span><br><span class="line">         &#125;</span><br><span class="line">         <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.ignoreUnresolvablePlaceholders) &#123;</span><br><span class="line">            <span class="hljs-comment">// Proceed with unprocessed value.</span></span><br><span class="line">            <span class="hljs-comment">//忽略不能解析的占位符，</span></span><br><span class="line">            startIndex = result.indexOf(<span class="hljs-keyword">this</span>.placeholderPrefix, endIndex + <span class="hljs-keyword">this</span>.placeholderSuffix.length());</span><br><span class="line">         &#125;</span><br><span class="line">         <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"Could not resolve placeholder '"</span> +</span><br><span class="line">                  placeholder + <span class="hljs-string">"'"</span> + <span class="hljs-string">" in value \""</span> + value + <span class="hljs-string">"\""</span>);</span><br><span class="line">         &#125;</span><br><span class="line">         visitedPlaceholders.remove(originalPlaceholder);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">         <span class="hljs-comment">//没有结束符则将前缀作为placeholder的一部分</span></span><br><span class="line">         startIndex = -<span class="hljs-number">1</span>;</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="hljs-keyword">return</span> result.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这是一个递归的过程，依次对字符串中的占位符进行解析，如果找到的资源中还存在占位符，那么会先对资源中的占位符进行解析，然后在替换原字符串中的占位符，以此类推，当出现循环引用时,如”placeholder=${placeholder} 则会抛出异常。</p>
+
+        </div>
+        
+        <div class="level is-size-7 is-uppercase">
+            <div class="level-start">
+                <div class="level-item">
+                    <span class="is-size-6 has-text-grey has-mr-7">#</span>
+                    <a class="has-link-grey -link" href="/tags/Java/">Java</a>, <a class="has-link-grey -link" href="/tags/Spring/">Spring</a>
+                </div>
+            </div>
+        </div>
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev" href="/2019/04/19/java/HashMap/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">HashMap源码</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next" href="/2018/11/27/spring/1_AbstractApplicationContext/">
+                <span class="level-item">（一）AbstractApplicationContext分析</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        
+<div id="comment-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.min.js"></script>
+<script>
+    var gitalk = new Gitalk({
+        clientID: 'cf7aa758f9a4052fbe0f',
+        clientSecret: '28e7b77e22f03e858a36363da98599efc090de9f',
+        id: 'b8ed7e1387ce89a046c05bfecd6ab008',
+        repo: 'talk',
+        owner: 'jingleWang',
+        admin: "jingleWang"
+    })
+    gitalk.render('comment-container')
+</script>
+
+    </div>
+</div>
+</div>
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered">
+                <div>
+                    
+                        <figure class="image container is-128x128 has-mb-6">
+                            <img class="is-rounded" src="http://pic.jingl.wang/2019-03-02-IMG_3591.jpg" alt="Jinglu Wang">
+                        </figure>
+                    
+                    
+                    <p class="is-size-4 is-block">
+                        Jinglu Wang
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        Everything will be better
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>Hangzhou China</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        7
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        6
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        4
+                    </p>
+                </div>
+            </div>
+        </nav>
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/jingleWang">
+                关注我</a>
+        </div>
+        
+        
+        <div class="level is-mobile">
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Github" href="https://github.com/jingleWang">
+                
+                <i class="fab fa-github"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="weibo" href="https://weibo.com/wjl0225">
+                
+                <i class="fab fa-weibo"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="ins" href="https://www.instagram.com/jinglu.wang/">
+                
+                <i class="fab fa-instagram"></i>
+                
+            </a>
+            
+        </div>
+        
+    </div>
+</div>
+    
+        
+<div class="card widget" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><ul class="menu-list"><li>
+        <a class="is-flex" href="#PropertyResolver">
+        <span class="has-mr-6">1.1</span>
+        <span>PropertyResolver</span>
+        </a></li><li>
+        <a class="is-flex" href="#Environment">
+        <span class="has-mr-6">1.2</span>
+        <span>Environment</span>
+        </a></li></ul><li>
+        <a class="is-flex" href="#AbstractEnvironment">
+        <span class="has-mr-6">2</span>
+        <span>AbstractEnvironment</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#ConfigurablePropertyResolver">
+        <span class="has-mr-6">2.1</span>
+        <span>ConfigurablePropertyResolver</span>
+        </a></li><li>
+        <a class="is-flex" href="#ConfigurableEnvironment">
+        <span class="has-mr-6">2.2</span>
+        <span>ConfigurableEnvironment</span>
+        </a></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+
+    
+        
+
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            链接
+        </h3>
+        <ul class="menu-list">
+        
+            <li>
+                <a class="level is-mobile" href="http://nikan1996.coding.me/" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">Leo Ni</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">nikan1996.coding.me</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="http://zzcoder.cn/" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">zz</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">zzcoder.cn</span>
+                    </span>
+                </a>
+            </li>
+        
+            <li>
+                <a class="level is-mobile" href="https://zhengchenyang.github.io/" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">zcy</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">zhengchenyang.github.io</span>
+                    </span>
+                </a>
+            </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+
+
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                分类
+            </h3>
+            <ul class="menu-list">
+            <li>
+        <a class="level is-marginless" href="/categories/JVM/">
+            <span class="level-start">
+                <span class="level-item">JVM</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/JVM/内存管理/">
+            <span class="level-start">
+                <span class="level-item">内存管理</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/Java/">
+            <span class="level-start">
+                <span class="level-item">Java</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">5</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/Java/RPC/">
+            <span class="level-start">
+                <span class="level-item">RPC</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/Java/Spring源码/">
+            <span class="level-start">
+                <span class="level-item">Spring源码</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/Java/源码阅读/">
+            <span class="level-start">
+                <span class="level-item">源码阅读</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a></li></ul></li>
+            </ul>
+        </div>
+    </div>
+</div>
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            标签云
+        </h3>
+        <a href="/tags/JVM/" style="font-size: 15px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a>
+    </div>
+</div>
+
+    
+    
+        <div class="column-right-shadow is-hidden-widescreen ">
+        
+            
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2019/04/19/java/HashMap/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2019-04-19-u-1418578175-1769712762%26fm-26%26gp-0.jpg" alt="HashMap源码">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-04-19T06:00:00.000Z">2019-04-19</time></div>
+                    <a href="/2019/04/19/java/HashMap/" class="has-link-black-ter is-size-6">HashMap源码</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/Java/">Java</a> / <a class="has-link-grey -link" href="/categories/Java/源码阅读/">源码阅读</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/12/10/spring/2_Environment/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2019-03-02-DSC_0678.jpg" alt="（二）环境资源管理">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-12-10T09:48:25.000Z">2018-12-10</time></div>
+                    <a href="/2018/12/10/spring/2_Environment/" class="has-link-black-ter is-size-6">（二）环境资源管理</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/Java/">Java</a> / <a class="has-link-grey -link" href="/categories/Java/Spring源码/">Spring源码</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/11/27/spring/1_AbstractApplicationContext/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2019-03-02-150042.png" alt="（一）AbstractApplicationContext分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-11-27T09:48:25.000Z">2018-11-27</time></div>
+                    <a href="/2018/11/27/spring/1_AbstractApplicationContext/" class="has-link-black-ter is-size-6">（一）AbstractApplicationContext分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/Java/">Java</a> / <a class="has-link-grey -link" href="/categories/Java/Spring源码/">Spring源码</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/04/16/jvm/垃圾回收/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2018-08-14-151534.jpg" alt="Java垃圾回收">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-04-16T09:48:25.000Z">2018-04-16</time></div>
+                    <a href="/2018/04/16/jvm/垃圾回收/" class="has-link-black-ter is-size-6">Java垃圾回收</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/JVM/">JVM</a> / <a class="has-link-grey -link" href="/categories/JVM/内存管理/">内存管理</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/04/14/jvm/JavaMemory/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2018-04-15-064544.jpg" alt="Java内存区域">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-04-14T09:48:25.000Z">2018-04-14</time></div>
+                    <a href="/2018/04/14/jvm/JavaMemory/" class="has-link-black-ter is-size-6">Java内存区域</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/JVM/">JVM</a> / <a class="has-link-grey -link" href="/categories/JVM/内存管理/">内存管理</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/12/">
+                <span class="level-start">
+                    <span class="level-item">十二月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/11/">
+                <span class="level-start">
+                    <span class="level-item">十一月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/02/">
+                <span class="level-start">
+                    <span class="level-item">二月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/JVM/">
+                        <span class="tag">JVM</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Java/">
+                        <span class="tag">Java</span>
+                        <span class="tag is-grey">7</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/RPC/">
+                        <span class="tag">RPC</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Spring/">
+                        <span class="tag">Spring</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+        
+        </div>
+    
+</div>
+
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only has-order-3 column-right ">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2019/04/19/java/HashMap/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2019-04-19-u-1418578175-1769712762%26fm-26%26gp-0.jpg" alt="HashMap源码">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-04-19T06:00:00.000Z">2019-04-19</time></div>
+                    <a href="/2019/04/19/java/HashMap/" class="has-link-black-ter is-size-6">HashMap源码</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/Java/">Java</a> / <a class="has-link-grey -link" href="/categories/Java/源码阅读/">源码阅读</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/12/10/spring/2_Environment/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2019-03-02-DSC_0678.jpg" alt="（二）环境资源管理">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-12-10T09:48:25.000Z">2018-12-10</time></div>
+                    <a href="/2018/12/10/spring/2_Environment/" class="has-link-black-ter is-size-6">（二）环境资源管理</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/Java/">Java</a> / <a class="has-link-grey -link" href="/categories/Java/Spring源码/">Spring源码</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/11/27/spring/1_AbstractApplicationContext/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2019-03-02-150042.png" alt="（一）AbstractApplicationContext分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-11-27T09:48:25.000Z">2018-11-27</time></div>
+                    <a href="/2018/11/27/spring/1_AbstractApplicationContext/" class="has-link-black-ter is-size-6">（一）AbstractApplicationContext分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/Java/">Java</a> / <a class="has-link-grey -link" href="/categories/Java/Spring源码/">Spring源码</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/04/16/jvm/垃圾回收/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2018-08-14-151534.jpg" alt="Java垃圾回收">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-04-16T09:48:25.000Z">2018-04-16</time></div>
+                    <a href="/2018/04/16/jvm/垃圾回收/" class="has-link-black-ter is-size-6">Java垃圾回收</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/JVM/">JVM</a> / <a class="has-link-grey -link" href="/categories/JVM/内存管理/">内存管理</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/04/14/jvm/JavaMemory/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="http://pic.jingl.wang/2018-04-15-064544.jpg" alt="Java内存区域">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-04-14T09:48:25.000Z">2018-04-14</time></div>
+                    <a href="/2018/04/14/jvm/JavaMemory/" class="has-link-black-ter is-size-6">Java内存区域</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/JVM/">JVM</a> / <a class="has-link-grey -link" href="/categories/JVM/内存管理/">内存管理</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/12/">
+                <span class="level-start">
+                    <span class="level-item">十二月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/11/">
+                <span class="level-start">
+                    <span class="level-item">十一月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/04/">
+                <span class="level-start">
+                    <span class="level-item">四月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/02/">
+                <span class="level-start">
+                    <span class="level-item">二月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/JVM/">
+                        <span class="tag">JVM</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Java/">
+                        <span class="tag">Java</span>
+                        <span class="tag is-grey">7</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/RPC/">
+                        <span class="tag">RPC</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Spring/">
+                        <span class="tag">Spring</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+</div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/jinglu.png" alt="（二）环境资源管理" height="28">
+                
+                </a>
+                <p class="is-size-7">
+                &copy; 2019 Mr. Ben&nbsp;
+                Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> & <a href="http://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                
+                </p>
+            </div>
+            <div class="level-end">
+            
+                <div class="field has-addons is-flex-center-mobile has-mt-5-mobile is-flex-wrap is-flex-middle">
+                
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="weibo" href="https://weibo.com/wjl0225">
+                        
+                        <i class="fab fa-weibo"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="ins" href="https://www.instagram.com/jinglu.wang/">
+                        
+                        <i class="fab fa-instagram"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="GitHub" href="https://github.com/jingleWang">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                </p>
+                
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+
+    
+    
+    
+    <script src="/js/animation.js"></script>
+    
+
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+    <script src="/js/gallery.js" defer></script>
+    
+
+    
+    
+
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+
+    
+    
+
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+    <script src="/js/clipboard.js" defer></script>
+    
+
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么...">
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+</html>

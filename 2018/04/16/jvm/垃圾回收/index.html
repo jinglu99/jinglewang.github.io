@@ -2,21 +2,25 @@
 <html lang="zh">
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-<title>Ben&#39;s Blog</title>
+<title>Java垃圾回收 - Ben&#39;s Blog</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
 
 
-    <meta name="description" content="生活是一种艺术">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Ben&#39;s Blog">
-<meta property="og:url" content="http://yoursite.com/index.html">
+    <meta name="description" content="在Java的技术体系中的自动内存管理主要解决了2个问题即内存的分配及内存的回收，在这篇文章中，我们主要讨论的是JVM的垃圾回收机制。对于垃圾回收，我们主要需要考虑3个问题：  哪些内存需要被回收 如何回收 什么时候需要被回收  接下来，我将围绕这3个问题，对Java的垃圾回收做一个简单的介绍。">
+<meta name="keywords" content="Java,JVM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java垃圾回收">
+<meta property="og:url" content="http://yoursite.com/2018/04/16/jvm/垃圾回收/index.html">
 <meta property="og:site_name" content="Ben&#39;s Blog">
-<meta property="og:description" content="生活是一种艺术">
+<meta property="og:description" content="在Java的技术体系中的自动内存管理主要解决了2个问题即内存的分配及内存的回收，在这篇文章中，我们主要讨论的是JVM的垃圾回收机制。对于垃圾回收，我们主要需要考虑3个问题：  哪些内存需要被回收 如何回收 什么时候需要被回收  接下来，我将围绕这3个问题，对Java的垃圾回收做一个简单的介绍。">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://pic.jingl.wang/2018-04-16-152250.png">
+<meta property="og:updated_time" content="2019-03-04T03:01:30.137Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Ben&#39;s Blog">
-<meta name="twitter:description" content="生活是一种艺术">
+<meta name="twitter:title" content="Java垃圾回收">
+<meta name="twitter:description" content="在Java的技术体系中的自动内存管理主要解决了2个问题即内存的分配及内存的回收，在这篇文章中，我们主要讨论的是JVM的垃圾回收机制。对于垃圾回收，我们主要需要考虑3个问题：  哪些内存需要被回收 如何回收 什么时候需要被回收  接下来，我将围绕这3个问题，对Java的垃圾回收做一个简单的介绍。">
+<meta name="twitter:image" content="http://pic.jingl.wang/2018-04-16-152250.png">
 
 
 
@@ -98,7 +102,7 @@ var _hmt = _hmt || [];
         <div class="navbar-brand is-flex-center">
             <a class="navbar-item navbar-logo" href="/">
             
-                <img src="/images/jinglu.png" alt="Ben&#39;s Blog" height="28">
+                <img src="/images/jinglu.png" alt="Java垃圾回收" height="28">
             
             </a>
         </div>
@@ -106,7 +110,7 @@ var _hmt = _hmt || [];
             
             <div class="navbar-start">
                 
-                <a class="navbar-item is-active" href="/">Home</a>
+                <a class="navbar-item" href="/">Home</a>
                 
                 <a class="navbar-item" href="/archives">Archives</a>
                 
@@ -128,6 +132,10 @@ var _hmt = _hmt || [];
                     
                 
                 
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
                 
                 <a class="navbar-item search" title="搜索" href="javascript:;">
                     <i class="fas fa-search"></i>
@@ -141,189 +149,12 @@ var _hmt = _hmt || [];
     <section class="section">
         <div class="container">
             <div class="columns">
-                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main">
-    <div class="card">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main"><div class="card">
     
     <div class="card-image">
-        <a href="/2019/04/19/java/HashMap/" class="image is-7by1">
-            <img class="thumbnail" src="http://pic.jingl.wang/2019-04-19-u-1418578175-1769712762%26fm-26%26gp-0.jpg" alt="HashMap源码">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2019-04-19T06:00:00.000Z">2019-04-19</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/Java/">Java</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/Java/源码阅读/">源码阅读</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    21 分钟 读完 (大约 3139 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2019/04/19/java/HashMap/">HashMap源码</a>
-            
-        </h1>
-        <div class="content">
-            <p>HashMap是一个基于散列表的Map实现，和HashTable类似，实现了所有的Map方法，但与HashTable不同的是，HashMap允许key和value的值为null，且HashMap是线程不安全的。HashMap不会保证映射的顺序。<br></p>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2019/04/19/java/HashMap/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2018/12/10/spring/2_Environment/" class="image is-7by1">
-            <img class="thumbnail" src="http://pic.jingl.wang/2019-03-02-DSC_0678.jpg" alt="（二）环境资源管理">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2018-12-10T09:48:25.000Z">2018-12-10</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/Java/">Java</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/Java/Spring源码/">Spring源码</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    25 分钟 读完 (大约 3747 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2018/12/10/spring/2_Environment/">（二）环境资源管理</a>
-            
-        </h1>
-        <div class="content">
-            <p>spring 中的运行环境通过Environment进行管理。环境分为2种：profile和property。</p>
-<p>profile的作用是，在实际开发中，开发环境和实际线上环境的配置是不同的，但是如何能不修改代码就可以让代码在2个不同的环境中运行呢，profile就是用来解决这个问题的，可以为一个bean指定一个或多个profile，当代码运行在不同环境中时，通过配置profile，spring可以知道是否应该加载这个bean，以此来区分开发环境和正式环境的配置。</p>
-<p>property 即常用的资源配置，这里不多赘述。</p>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2018/12/10/spring/2_Environment/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2018/11/27/spring/1_AbstractApplicationContext/" class="image is-7by1">
-            <img class="thumbnail" src="http://pic.jingl.wang/2019-03-02-150042.png" alt="（一）AbstractApplicationContext分析">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2018-11-27T09:48:25.000Z">2018-11-27</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/Java/">Java</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/Java/Spring源码/">Spring源码</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    16 分钟 读完 (大约 2462 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2018/11/27/spring/1_AbstractApplicationContext/">（一）AbstractApplicationContext分析</a>
-            
-        </h1>
-        <div class="content">
-            <p>AbstractApplicationContext(下称AAC) 是Spring应用上下文的基类，通过调用此类的refresh()方法来初始化spring容器，它的依赖关系如图所示，大部分的接口方法在AAC中进行实现。<br></p>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2018/11/27/spring/1_AbstractApplicationContext/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2018/04/16/jvm/垃圾回收/" class="image is-7by1">
+        <span class="image is-7by1">
             <img class="thumbnail" src="http://pic.jingl.wang/2018-08-14-151534.jpg" alt="Java垃圾回收">
-        </a>
+        </span>
     </div>
     
     <div class="card-content article ">
@@ -349,7 +180,7 @@ var _hmt = _hmt || [];
         
         <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
             
-                <a class="has-link-black-ter" href="/2018/04/16/jvm/垃圾回收/">Java垃圾回收</a>
+                Java垃圾回收
             
         </h1>
         <div class="content">
@@ -362,198 +193,77 @@ var _hmt = _hmt || [];
 </ul>
 <p>接下来，我将围绕这3个问题，对Java的垃圾回收做一个简单的介绍。</p>
 </blockquote>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2018/04/16/jvm/垃圾回收/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2018/04/14/jvm/JavaMemory/" class="image is-7by1">
-            <img class="thumbnail" src="http://pic.jingl.wang/2018-04-15-064544.jpg" alt="Java内存区域">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2018-04-14T09:48:25.000Z">2018-04-14</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/JVM/">JVM</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/JVM/内存管理/">内存管理</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    18 分钟 读完 (大约 2715 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2018/04/14/jvm/JavaMemory/">Java内存区域</a>
-            
-        </h1>
-        <div class="content">
-            <blockquote>
-<p>对于从事C、C++的开发人员来说，在内存管理方面他们对于每一个对象都拥有所有权，需要负责每一个对象的创建与销毁。对于从事Java的开发人员来说，由于有垃圾回收机制的存在，可以不用对对象的内存管理负责，但一旦出现内存泄漏，如果不了解虚拟机的内存机制，对于开发人员来说查找错误是非常困难的。</p>
-</blockquote>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2018/04/14/jvm/JavaMemory/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2018/02/05/rpc/RPC/" class="image is-7by1">
-            <img class="thumbnail" src="http://pic.jingl.wang/2019-03-02-145509.png" alt="RPC">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2018-02-05T09:48:25.000Z">2018-02-05</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/Java/">Java</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/Java/RPC/">RPC</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    11 分钟 读完 (大约 1627 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2018/02/05/rpc/RPC/">RPC</a>
-            
-        </h1>
-        <div class="content">
-            <p>​    第一次用到RPC框架是在实习公司的那段时间做一个搜索引擎的项目，使用了阿里的Dubbo，用来打通不同工程间的信息交互，当时对RPC框架并不是非常了解，只知道用它可以将远程服务像本地方法一样得调用，虽然对它有着一点好奇，却也并没有打算去深入了解他。后来，大四准备毕业设计了，也没有什么好的想法，所以就想写一个自己的RPC框架，重复造个轮子，权当学习，本文只是简单的介绍一下RPC框架。</p>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2018/02/05/rpc/RPC/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2018/02/01/java/ConcurrentHashMap源码浅析/" class="image is-7by1">
-            <img class="thumbnail" src="http://pic.jingl.wang/2018-04-14-115554.jpg" alt="ConcurrentHashMap源码浅析">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2018-02-01T09:48:25.000Z">2018-02-01</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/Java/">Java</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/Java/源码阅读/">源码阅读</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    16 分钟 读完 (大约 2460 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2018/02/01/java/ConcurrentHashMap源码浅析/">ConcurrentHashMap源码浅析</a>
-            
-        </h1>
-        <div class="content">
-            <h2 id="基本数据结构"><a href="#基本数据结构" class="headerlink" title="基本数据结构"></a>基本数据结构</h2><p><img src="http://pic.jingl.wang/2018-04-14-114851.png" alt></p>
+<a id="more"></a> 
+<h2 id="哪些内存需要被回收"><a href="#哪些内存需要被回收" class="headerlink" title="哪些内存需要被回收"></a>哪些内存需要被回收</h2><p>在进行内存回收之前，我们首先需要知道，哪些对象可以被回收，需要有一定的方法去判断一个对象是否能被回收。</p>
+<h3 id="引用计数算法"><a href="#引用计数算法" class="headerlink" title="引用计数算法"></a>引用计数算法</h3><p>引用计数算法是一个非常古老的算法，实现非常的简单，判定的效率也非常高，他的思路是在对象中添加一个引用计数器，每当有一个地方引用这个对象时，这个计数器就加1，但一个地方的引用失效时，这个计数器就减1，如果这个计数器为0，就代表这个对象没有被引用，可以被回收。</p>
+<p>这个算法，在大部分情况下，都是一个非常不错的算法，当时在Java虚拟机中，并没有使用这个算法来管理内存，主要是因为这个算法无法解决互相循环引用的问题，如下面这段代码</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">A a = <span class="hljs-keyword">new</span> A();</span><br><span class="line">B b = <span class="hljs-keyword">new</span> B();</span><br><span class="line">a.b = b;</span><br><span class="line">b.a = a;</span><br><span class="line"></span><br><span class="line">a = <span class="hljs-keyword">null</span>;</span><br><span class="line">b = <span class="hljs-keyword">null</span>;</span><br></pre></td></tr></table></figure>
+<p>当执行完第5、6行代码时，这2个对象已经不可能在被访问，当时由于他们之间存在着互相引用，这两个对象的引用计数器都不为0，所以如果使用引用计数作为判断算法，这个2个对象将不能被垃圾收集器回收。</p>
+<h3 id="可达性分析算法"><a href="#可达性分析算法" class="headerlink" title="可达性分析算法"></a>可达性分析算法</h3><p>在主流商用虚拟机中，都会使用一种叫可达性分析的方法来确定一个对象是否可以被回收，这种方法的主要思路是从一个<code>GC Root</code>作为起始点，开始向下进行搜索，当一个对象与GC Root之间没有引用链相连的话，就说明这个对象不可用。</p>
+<p><img src="http://pic.jingl.wang/2018-04-16-152250.png" alt="可达性测试判断对象是否可以被回收"></p>
+<p>如上图所示，虽然Obj 6、7、8直接有相互的关联，但Obj 6与GC Root 之间没有直接的引用链进行连接，所以Obj6，Obj7, Obj8将会被判断为无效对象。</p>
+<p>一般的，以下几种类型的对象可以被作为GC Root：</p>
 <ul>
-<li>用数组存储每个桶的首节点</li>
-<li>使用hash值分桶</li>
-<li>hash值相同的元素，以链表的形式存放在桶中</li>
-<li>当一个桶内的元素超过8个时，将链表转换为红黑树</li>
+<li>Java栈（栈帧中的本地变量表）中的引用的对象</li>
+<li>方法区中静态属性引用的对象</li>
+<li>方法区中常量引用的对象</li>
+<li>本地方法栈中JNI（Native 方法）引用的对象</li>
 </ul>
+<h3 id="4种引用类型"><a href="#4种引用类型" class="headerlink" title="4种引用类型"></a>4种引用类型</h3><ul>
+<li>强引用： 普通的引用关系，只要一个对象有强引用存在，那么永远不会被回收。</li>
+<li>软引用：当内存即将溢出时，垃圾收集器将软引用的对象纳入回收范围进行回收，如果回收后任没有足够内存，才会抛出内存溢出的异常，用SoftReference来实现</li>
+<li>弱引用：被弱引用关联的对象只能存活至下一次垃圾回收之前，用WeakReference来实现</li>
+<li>虚引用：最弱的一种引用关系，这种关系完全不会对其生存时间构成影响，这种引用的唯一用处就是在一个对象被回收时，收到一个系统通知。用PhantomReference来实现。</li>
+</ul>
+<h3 id="最后一次拯救自己的机会"><a href="#最后一次拯救自己的机会" class="headerlink" title="最后一次拯救自己的机会"></a>最后一次拯救自己的机会</h3><p>一个在可达性分析中被判断需要回收的对象，在被真正回收之前，可能还要经历2次标记，第一次标记将会筛选出需要执行finallize方法的对象（既重写过finilize方法的类的实例），当对象没有覆盖finalize方法，或者已经执行过finalize方法，则会被判断为不需要执行finalize方法。</p>
+<p>所有在第一次标记中被判断为需要执行finalize方法的对象，将会被放入一个叫F-Queue的队列中，稍后JVM会触发执行finalize方法，但并不保证会等待finalize方法执行完毕。finalize方法即是最后一次能拯救自己的机会，在finalize方法中可以将对象赋值给某个类变量。那么在稍后GC对F-Queue的第二次小规模标记时，将会把这些对象移除即将回收的集合，经过2次标记，那么这个对象基本上就会被回收了。</p>
+<p>那些在finalize方法中存活下来的对象，如果下一次被判断为需要回收，那么将不会被执行finalize方法，直接被回收。</p>
+<h3 id="回收方法区"><a href="#回收方法区" class="headerlink" title="回收方法区"></a>回收方法区</h3><p>在方法区中，主要回收的是2部分对象：废弃常量和无用的类。废弃的常量就是在任何地方都没有被引用的对象，而无用的类的判断比较复杂需要满足3个条件：</p>
+<ul>
+<li>该类所有的实例都已经被回收</li>
+<li>加载该类的ClassLoader已经被回收</li>
+<li>该类的Class对象没有被引用，在任何地方无法通过反射访问该类</li>
+</ul>
+<p>当满足上面三个条件后，这个无用的类，就可以被回收了。</p>
+<h2 id="如何回收"><a href="#如何回收" class="headerlink" title="如何回收"></a>如何回收</h2><h3 id="垃圾收集算法"><a href="#垃圾收集算法" class="headerlink" title="垃圾收集算法"></a>垃圾收集算法</h3><h4 id="标记-清除算法"><a href="#标记-清除算法" class="headerlink" title="标记-清除算法"></a>标记-清除算法</h4><p>标记-清除，是一种最基本的垃圾收集算法，分为标记和清除两个步骤：首先标记出那些对象可以被回收，然后在标记完成后统一进行回收操作。这种算法的有2个不足的地方：</p>
+<ul>
+<li>效率问题：标记和清除的效率都不高</li>
+<li>空间问题：会产生大量的内存碎片，导致为大对象分配内存时无法找到足够的内存空间而提前触发垃圾回收</li>
+</ul>
+<h4 id="复制算法"><a href="#复制算法" class="headerlink" title="复制算法"></a>复制算法</h4><p>为了解决标记清除带来的不足，出现了一种复制算法，这种方法的思路是将内存区域分为2块，每次只使用其中的一块，但这一块内存用尽，将会触发一次垃圾回收，将标记存活的对象复制到另一块内存中，然后将这一块内存一次性全部清空，运行高效，也解决了内存碎片的问题，但是，这需要将内存空间缩小为原来的一半作为代价，而且当存在大量对象存活时，就需要进行较多的复制操作，效率将会变得非常低，所以这种算法一半会用在新生代中。</p>
+<p>现在的商业JVM一般都采用这种算法作为新生代的回收机制， 新生代的一个特点就是大多数对象会朝生夕死，所以并不需要按照1：1的比例来划分内存空间，而是可以将内存划分为一块较大的eden空间和2块较小的Survivor空间，每次使用eden和其中的一块Survivor，当回收时，将存活的对象复制到另一块Survivor中，最后清理掉Eden和刚才用过的Survivor，Hotspot虚拟机默认的Eden和Survivor的分配比是8：1，所以至少有90%的内存能被使用，只有10%的内存会被浪费。</p>
+<p>在某些场景下，我们会遇到Survivor空间不够用的情况，这时，需要依赖其他内存（老年代）进行分配担保，如果在Survivor中没有足够的空间来容纳存活的对象，那么这些对象将会被直接放入老年代。</p>
+<h4 id="标记整理算法"><a href="#标记整理算法" class="headerlink" title="标记整理算法"></a>标记整理算法</h4><p>针对老年代高存活率的特点，出现了标记整理算法，其中标记过程仍然和之前是一样的，但后续的步骤是将所有存活的对象都向一端移动，然后直接清除边界以外的内存。</p>
+<h4 id="分代收集算法"><a href="#分代收集算法" class="headerlink" title="分代收集算法"></a>分代收集算法</h4><p>分代收集本质上是一种整合前几种算法的思想，它将内存分为新生代和老年代，然后根据不同年代的特点采用合适的收集算法。 </p>
+<h3 id="HotSpot中根节点的枚举"><a href="#HotSpot中根节点的枚举" class="headerlink" title="HotSpot中根节点的枚举"></a>HotSpot中根节点的枚举</h3><p>在进行可达性分析时，我们需要非常快速的知道在全局性的属性或栈中，哪些地方是引用，可以作为GC Root，然而，这个寻找的范围是非常大的，如果需要逐个检查，那会非常的耗时，而且在枚举GC root时，必须保证一致性，也就是在分析过程中，对象的引用关系不能发生变化，这就必须要在分析过程中暂停所有线程（Stop the world）。</p>
+<h4 id="OopMap"><a href="#OopMap" class="headerlink" title="OopMap"></a>OopMap</h4><p>在目前主流的JVM中使用的都是准确式GC（能够准确的知道一块内存是否为引用），在HotSpot中，使用了一个叫OopMap的结构来达到这个目的，他会记录下栈和寄存器中那些地方为引用，这样在扫描时就能快速的知道那些地方是GC root。</p>
+<h4 id="安全点"><a href="#安全点" class="headerlink" title="安全点"></a>安全点</h4><p>几乎每一个操作，都将会改变OopMap, 所以如果每执行一条操作就修改一次OopMap，将会带来很多额外的开销，所以就有了安全点的概念，每当程序执行到这些安全点时，才会生成OopMap，所以也只有在执行到安全点的时候，才可以进行GC。</p>
+<p>安全点的选择是以“是否具有让程序长时间运行的特征”作为选择依据的。比如:方法调用，循环跳转，异常跳转等。</p>
+<p>最后一个问题是，如何在需要GC时，让所有线程都中断在安全点上，一般有2种方案：</p>
+<ul>
+<li>抢先式中断：在GC发生时，中断所有线程，如果有线程没有在安全点上，则恢复线程，直到它运行到一个安全点。</li>
+<li>主动式中断：这种方法需要设置一个用于标记是否需要GC的标志，当每个线程运行到安全点时，将会主动询问是否需要GC,但标记为真时，挂起当前线程。 </li>
+</ul>
+<h4 id="安全区"><a href="#安全区" class="headerlink" title="安全区"></a>安全区</h4><p>当一个线程处于Sleep状态，或者Block状态时，没有被分配CPU时间，无法响应系统的中断请求，也就无法到达该线程的安全点，所以就需要用安全区来解决了。既在某个区域内，引用关系不会发生变化，在任意地方开始GC都是安全的。</p>
+<h2 id="什么时候回收"><a href="#什么时候回收" class="headerlink" title="什么时候回收"></a>什么时候回收</h2><h3 id="分配回收策略"><a href="#分配回收策略" class="headerlink" title="分配回收策略"></a>分配回收策略</h3><h4 id="对象优先在Eden区进行分配"><a href="#对象优先在Eden区进行分配" class="headerlink" title="对象优先在Eden区进行分配"></a>对象优先在Eden区进行分配</h4><p>大多数情况下，对象会优先被分配进入Eden区，当Eden没有足够的空间来容纳新对象时，JVM会触发一次Minor GC（新生代GC），将Eden+当前Survivor中的对象复制进入另一块Survivor中，如果存活的对象大小超出Survivor区的大小，JVM将会使用分配担保机制，将对象移入老年代中。</p>
+<h4 id="大对象直接进入老年代"><a href="#大对象直接进入老年代" class="headerlink" title="大对象直接进入老年代"></a>大对象直接进入老年代</h4><p>当出现大对象时，往往会导致提前触发垃圾回收，以及在Eden和Survivor之间出现大量的内存复制，所以JVM提供了一个pretenureSizeThreshold参数，让超过这个大小的对象直接在老年代进行分配内存。</p>
+<h4 id="长期存活对象进入老年代"><a href="#长期存活对象进入老年代" class="headerlink" title="长期存活对象进入老年代"></a>长期存活对象进入老年代</h4><p>当对象没经历一次Minor GC时，他的年龄就增加一岁，当年龄增加到一定的程度（默认15岁），该对象就会没放入老年代中。</p>
+<h4 id="动态年龄判断"><a href="#动态年龄判断" class="headerlink" title="动态年龄判断"></a>动态年龄判断</h4><p>如果在Survivor中相同年龄大小的所有对象大小总和大于Survivor空间的一半，年龄大于等于该年龄的对象就可以直接进入老年代中。</p>
+<h4 id="空间分配担保"><a href="#空间分配担保" class="headerlink" title="空间分配担保"></a>空间分配担保</h4><p>在发生Minor GC之前，JVM会首先检查老年代中最大可用连续空间是否大于新生代所有对象之和，如果这个条件成立，那么Minor GC是安全的，如果不成立，那么将会查看HandlePromotionFailure参数是否设置为允许担保失败，如果允许，将会继续检查老年代最大连续可用空间是否大于历次晋升到老年代的对象的大小总和的平均值，如果大于，则将会触发一次Minor GC, 如果小于，或者不允许担保失败，或者Minor GC失败是，将会触发老年的的Full GC。</p>
+<h3 id="Minor-GC"><a href="#Minor-GC" class="headerlink" title="Minor GC"></a>Minor GC</h3><p>发生在新生代的垃圾回收，非常频繁，回收速度较快</p>
+<h3 id="Full-GC"><a href="#Full-GC" class="headerlink" title="Full GC"></a>Full GC</h3><p>发生在老年代的垃圾回收，也叫Major GC, 经常会出现伴随至少一次的Minor GC， 速度比Minor GC慢十倍以上。</p>
+
         </div>
         
-        
-        <div class="level is-mobile">
+        <div class="level is-size-7 is-uppercase">
             <div class="level-start">
                 <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2018/02/01/java/ConcurrentHashMap源码浅析/#more">阅读更多</a>
+                    <span class="is-size-6 has-text-grey has-mr-7">#</span>
+                    <a class="has-link-grey -link" href="/tags/JVM/">JVM</a>, <a class="has-link-grey -link" href="/tags/Java/">Java</a>
                 </div>
             </div>
         </div>
+        
         
         
     </div>
@@ -563,9 +273,50 @@ var _hmt = _hmt || [];
 
 
 
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev" href="/2018/11/27/spring/1_AbstractApplicationContext/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">（一）AbstractApplicationContext分析</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next" href="/2018/04/14/jvm/JavaMemory/">
+                <span class="level-item">Java内存区域</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
 
 
 
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        
+<div id="comment-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.min.js"></script>
+<script>
+    var gitalk = new Gitalk({
+        clientID: 'cf7aa758f9a4052fbe0f',
+        clientSecret: '28e7b77e22f03e858a36363da98599efc090de9f',
+        id: 'a48d90fe741dd86ab2f6dd1d37edc6a1',
+        repo: 'talk',
+        owner: 'jingleWang',
+        admin: "jingleWang"
+    })
+    gitalk.render('comment-container')
+</script>
+
+    </div>
+</div>
 </div>
                 
 
@@ -668,6 +419,117 @@ var _hmt = _hmt || [];
 </div>
     
         
+<div class="card widget" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#哪些内存需要被回收">
+        <span class="has-mr-6">1</span>
+        <span>哪些内存需要被回收</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#引用计数算法">
+        <span class="has-mr-6">1.1</span>
+        <span>引用计数算法</span>
+        </a></li><li>
+        <a class="is-flex" href="#可达性分析算法">
+        <span class="has-mr-6">1.2</span>
+        <span>可达性分析算法</span>
+        </a></li><li>
+        <a class="is-flex" href="#4种引用类型">
+        <span class="has-mr-6">1.3</span>
+        <span>4种引用类型</span>
+        </a></li><li>
+        <a class="is-flex" href="#最后一次拯救自己的机会">
+        <span class="has-mr-6">1.4</span>
+        <span>最后一次拯救自己的机会</span>
+        </a></li><li>
+        <a class="is-flex" href="#回收方法区">
+        <span class="has-mr-6">1.5</span>
+        <span>回收方法区</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#如何回收">
+        <span class="has-mr-6">2</span>
+        <span>如何回收</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#垃圾收集算法">
+        <span class="has-mr-6">2.1</span>
+        <span>垃圾收集算法</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#标记-清除算法">
+        <span class="has-mr-6">2.1.1</span>
+        <span>标记-清除算法</span>
+        </a></li><li>
+        <a class="is-flex" href="#复制算法">
+        <span class="has-mr-6">2.1.2</span>
+        <span>复制算法</span>
+        </a></li><li>
+        <a class="is-flex" href="#标记整理算法">
+        <span class="has-mr-6">2.1.3</span>
+        <span>标记整理算法</span>
+        </a></li><li>
+        <a class="is-flex" href="#分代收集算法">
+        <span class="has-mr-6">2.1.4</span>
+        <span>分代收集算法</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#HotSpot中根节点的枚举">
+        <span class="has-mr-6">2.2</span>
+        <span>HotSpot中根节点的枚举</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#OopMap">
+        <span class="has-mr-6">2.2.1</span>
+        <span>OopMap</span>
+        </a></li><li>
+        <a class="is-flex" href="#安全点">
+        <span class="has-mr-6">2.2.2</span>
+        <span>安全点</span>
+        </a></li><li>
+        <a class="is-flex" href="#安全区">
+        <span class="has-mr-6">2.2.3</span>
+        <span>安全区</span>
+        </a></li></ul></li></ul></li><li>
+        <a class="is-flex" href="#什么时候回收">
+        <span class="has-mr-6">3</span>
+        <span>什么时候回收</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#分配回收策略">
+        <span class="has-mr-6">3.1</span>
+        <span>分配回收策略</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#对象优先在Eden区进行分配">
+        <span class="has-mr-6">3.1.1</span>
+        <span>对象优先在Eden区进行分配</span>
+        </a></li><li>
+        <a class="is-flex" href="#大对象直接进入老年代">
+        <span class="has-mr-6">3.1.2</span>
+        <span>大对象直接进入老年代</span>
+        </a></li><li>
+        <a class="is-flex" href="#长期存活对象进入老年代">
+        <span class="has-mr-6">3.1.3</span>
+        <span>长期存活对象进入老年代</span>
+        </a></li><li>
+        <a class="is-flex" href="#动态年龄判断">
+        <span class="has-mr-6">3.1.4</span>
+        <span>动态年龄判断</span>
+        </a></li><li>
+        <a class="is-flex" href="#空间分配担保">
+        <span class="has-mr-6">3.1.5</span>
+        <span>空间分配担保</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#Minor-GC">
+        <span class="has-mr-6">3.2</span>
+        <span>Minor GC</span>
+        </a></li><li>
+        <a class="is-flex" href="#Full-GC">
+        <span class="has-mr-6">3.3</span>
+        <span>Full GC</span>
+        </a></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+
     
         
 
@@ -1248,7 +1110,7 @@ var _hmt = _hmt || [];
             <div class="level-start has-text-centered-mobile">
                 <a class="footer-logo is-block has-mb-6" href="/">
                 
-                    <img src="/images/jinglu.png" alt="Ben&#39;s Blog" height="28">
+                    <img src="/images/jinglu.png" alt="Java垃圾回收" height="28">
                 
                 </a>
                 <p class="is-size-7">

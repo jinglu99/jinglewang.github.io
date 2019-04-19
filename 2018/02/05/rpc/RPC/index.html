@@ -2,21 +2,28 @@
 <html lang="zh">
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-<title>Ben&#39;s Blog</title>
+<title>RPC - Ben&#39;s Blog</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
 
 
-    <meta name="description" content="生活是一种艺术">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Ben&#39;s Blog">
-<meta property="og:url" content="http://yoursite.com/index.html">
+    <meta name="description" content="​    第一次用到RPC框架是在实习公司的那段时间做一个搜索引擎的项目，使用了阿里的Dubbo，用来打通不同工程间的信息交互，当时对RPC框架并不是非常了解，只知道用它可以将远程服务像本地方法一样得调用，虽然对它有着一点好奇，却也并没有打算去深入了解他。后来，大四准备毕业设计了，也没有什么好的想法，所以就想写一个自己的RPC框架，重复造个轮子，权当学习，本文只是简单的介绍一下RPC框架。">
+<meta name="keywords" content="Java,RPC">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RPC">
+<meta property="og:url" content="http://yoursite.com/2018/02/05/rpc/RPC/index.html">
 <meta property="og:site_name" content="Ben&#39;s Blog">
-<meta property="og:description" content="生活是一种艺术">
+<meta property="og:description" content="​    第一次用到RPC框架是在实习公司的那段时间做一个搜索引擎的项目，使用了阿里的Dubbo，用来打通不同工程间的信息交互，当时对RPC框架并不是非常了解，只知道用它可以将远程服务像本地方法一样得调用，虽然对它有着一点好奇，却也并没有打算去深入了解他。后来，大四准备毕业设计了，也没有什么好的想法，所以就想写一个自己的RPC框架，重复造个轮子，权当学习，本文只是简单的介绍一下RPC框架。">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://pic.jingl.wang/2018-02-05-162611.png">
+<meta property="og:image" content="http://pic.jingl.wang/2018-02-05-162636.png">
+<meta property="og:image" content="http://pic.jingl.wang/2018-02-06-053158.png">
+<meta property="og:image" content="http://pic.jingl.wang/2018-02-09-023427.png">
+<meta property="og:updated_time" content="2019-03-04T03:01:30.137Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Ben&#39;s Blog">
-<meta name="twitter:description" content="生活是一种艺术">
+<meta name="twitter:title" content="RPC">
+<meta name="twitter:description" content="​    第一次用到RPC框架是在实习公司的那段时间做一个搜索引擎的项目，使用了阿里的Dubbo，用来打通不同工程间的信息交互，当时对RPC框架并不是非常了解，只知道用它可以将远程服务像本地方法一样得调用，虽然对它有着一点好奇，却也并没有打算去深入了解他。后来，大四准备毕业设计了，也没有什么好的想法，所以就想写一个自己的RPC框架，重复造个轮子，权当学习，本文只是简单的介绍一下RPC框架。">
+<meta name="twitter:image" content="http://pic.jingl.wang/2018-02-05-162611.png">
 
 
 
@@ -98,7 +105,7 @@ var _hmt = _hmt || [];
         <div class="navbar-brand is-flex-center">
             <a class="navbar-item navbar-logo" href="/">
             
-                <img src="/images/jinglu.png" alt="Ben&#39;s Blog" height="28">
+                <img src="/images/jinglu.png" alt="RPC" height="28">
             
             </a>
         </div>
@@ -106,7 +113,7 @@ var _hmt = _hmt || [];
             
             <div class="navbar-start">
                 
-                <a class="navbar-item is-active" href="/">Home</a>
+                <a class="navbar-item" href="/">Home</a>
                 
                 <a class="navbar-item" href="/archives">Archives</a>
                 
@@ -128,6 +135,10 @@ var _hmt = _hmt || [];
                     
                 
                 
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
                 
                 <a class="navbar-item search" title="搜索" href="javascript:;">
                     <i class="fas fa-search"></i>
@@ -141,315 +152,12 @@ var _hmt = _hmt || [];
     <section class="section">
         <div class="container">
             <div class="columns">
-                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main">
-    <div class="card">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main"><div class="card">
     
     <div class="card-image">
-        <a href="/2019/04/19/java/HashMap/" class="image is-7by1">
-            <img class="thumbnail" src="http://pic.jingl.wang/2019-04-19-u-1418578175-1769712762%26fm-26%26gp-0.jpg" alt="HashMap源码">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2019-04-19T06:00:00.000Z">2019-04-19</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/Java/">Java</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/Java/源码阅读/">源码阅读</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    21 分钟 读完 (大约 3139 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2019/04/19/java/HashMap/">HashMap源码</a>
-            
-        </h1>
-        <div class="content">
-            <p>HashMap是一个基于散列表的Map实现，和HashTable类似，实现了所有的Map方法，但与HashTable不同的是，HashMap允许key和value的值为null，且HashMap是线程不安全的。HashMap不会保证映射的顺序。<br></p>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2019/04/19/java/HashMap/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2018/12/10/spring/2_Environment/" class="image is-7by1">
-            <img class="thumbnail" src="http://pic.jingl.wang/2019-03-02-DSC_0678.jpg" alt="（二）环境资源管理">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2018-12-10T09:48:25.000Z">2018-12-10</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/Java/">Java</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/Java/Spring源码/">Spring源码</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    25 分钟 读完 (大约 3747 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2018/12/10/spring/2_Environment/">（二）环境资源管理</a>
-            
-        </h1>
-        <div class="content">
-            <p>spring 中的运行环境通过Environment进行管理。环境分为2种：profile和property。</p>
-<p>profile的作用是，在实际开发中，开发环境和实际线上环境的配置是不同的，但是如何能不修改代码就可以让代码在2个不同的环境中运行呢，profile就是用来解决这个问题的，可以为一个bean指定一个或多个profile，当代码运行在不同环境中时，通过配置profile，spring可以知道是否应该加载这个bean，以此来区分开发环境和正式环境的配置。</p>
-<p>property 即常用的资源配置，这里不多赘述。</p>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2018/12/10/spring/2_Environment/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2018/11/27/spring/1_AbstractApplicationContext/" class="image is-7by1">
-            <img class="thumbnail" src="http://pic.jingl.wang/2019-03-02-150042.png" alt="（一）AbstractApplicationContext分析">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2018-11-27T09:48:25.000Z">2018-11-27</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/Java/">Java</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/Java/Spring源码/">Spring源码</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    16 分钟 读完 (大约 2462 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2018/11/27/spring/1_AbstractApplicationContext/">（一）AbstractApplicationContext分析</a>
-            
-        </h1>
-        <div class="content">
-            <p>AbstractApplicationContext(下称AAC) 是Spring应用上下文的基类，通过调用此类的refresh()方法来初始化spring容器，它的依赖关系如图所示，大部分的接口方法在AAC中进行实现。<br></p>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2018/11/27/spring/1_AbstractApplicationContext/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2018/04/16/jvm/垃圾回收/" class="image is-7by1">
-            <img class="thumbnail" src="http://pic.jingl.wang/2018-08-14-151534.jpg" alt="Java垃圾回收">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2018-04-16T09:48:25.000Z">2018-04-16</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/JVM/">JVM</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/JVM/内存管理/">内存管理</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    23 分钟 读完 (大约 3490 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2018/04/16/jvm/垃圾回收/">Java垃圾回收</a>
-            
-        </h1>
-        <div class="content">
-            <blockquote>
-<p>在Java的技术体系中的自动内存管理主要解决了2个问题即内存的分配及内存的回收，在这篇文章中，我们主要讨论的是JVM的垃圾回收机制。对于垃圾回收，我们主要需要考虑3个问题：</p>
-<ul>
-<li>哪些内存需要被回收</li>
-<li>如何回收</li>
-<li>什么时候需要被回收</li>
-</ul>
-<p>接下来，我将围绕这3个问题，对Java的垃圾回收做一个简单的介绍。</p>
-</blockquote>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2018/04/16/jvm/垃圾回收/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2018/04/14/jvm/JavaMemory/" class="image is-7by1">
-            <img class="thumbnail" src="http://pic.jingl.wang/2018-04-15-064544.jpg" alt="Java内存区域">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2018-04-14T09:48:25.000Z">2018-04-14</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/JVM/">JVM</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/JVM/内存管理/">内存管理</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    18 分钟 读完 (大约 2715 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2018/04/14/jvm/JavaMemory/">Java内存区域</a>
-            
-        </h1>
-        <div class="content">
-            <blockquote>
-<p>对于从事C、C++的开发人员来说，在内存管理方面他们对于每一个对象都拥有所有权，需要负责每一个对象的创建与销毁。对于从事Java的开发人员来说，由于有垃圾回收机制的存在，可以不用对对象的内存管理负责，但一旦出现内存泄漏，如果不了解虚拟机的内存机制，对于开发人员来说查找错误是非常困难的。</p>
-</blockquote>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2018/04/14/jvm/JavaMemory/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2018/02/05/rpc/RPC/" class="image is-7by1">
+        <span class="image is-7by1">
             <img class="thumbnail" src="http://pic.jingl.wang/2019-03-02-145509.png" alt="RPC">
-        </a>
+        </span>
     </div>
     
     <div class="card-content article ">
@@ -475,85 +183,58 @@ var _hmt = _hmt || [];
         
         <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
             
-                <a class="has-link-black-ter" href="/2018/02/05/rpc/RPC/">RPC</a>
+                RPC
             
         </h1>
         <div class="content">
             <p>​    第一次用到RPC框架是在实习公司的那段时间做一个搜索引擎的项目，使用了阿里的Dubbo，用来打通不同工程间的信息交互，当时对RPC框架并不是非常了解，只知道用它可以将远程服务像本地方法一样得调用，虽然对它有着一点好奇，却也并没有打算去深入了解他。后来，大四准备毕业设计了，也没有什么好的想法，所以就想写一个自己的RPC框架，重复造个轮子，权当学习，本文只是简单的介绍一下RPC框架。</p>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2018/02/05/rpc/RPC/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2018/02/01/java/ConcurrentHashMap源码浅析/" class="image is-7by1">
-            <img class="thumbnail" src="http://pic.jingl.wang/2018-04-14-115554.jpg" alt="ConcurrentHashMap源码浅析">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2018-02-01T09:48:25.000Z">2018-02-01</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/Java/">Java</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/Java/源码阅读/">源码阅读</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    16 分钟 读完 (大约 2460 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2018/02/01/java/ConcurrentHashMap源码浅析/">ConcurrentHashMap源码浅析</a>
-            
-        </h1>
-        <div class="content">
-            <h2 id="基本数据结构"><a href="#基本数据结构" class="headerlink" title="基本数据结构"></a>基本数据结构</h2><p><img src="http://pic.jingl.wang/2018-04-14-114851.png" alt></p>
+<a id="more"></a>
+<h2 id="RPC是什么"><a href="#RPC是什么" class="headerlink" title="RPC是什么"></a>RPC是什么</h2><p>​    远程过程调用（Remote Procedure Call，缩写为 RPC），顾名思义，就是一个允许在分布式环境中通过网络像调用本地方法一样调用其他远程服务器提供的服务的协议。它假定了某些通信协议的存在，如TCP、UDP、HTTP，并利用这些通信协议进行信息传递，在OSI模型中它跨越了应用层和传输层，所以在使用RPC协议时，并不需要关注底层的通信，这大大简化了分布式系统的开发难度。</p>
+<p>​    RPC采用的是C/S模型，请求程序是一个客户机，服务提供方是一个服务器。</p>
+<p><img src="http://pic.jingl.wang/2018-02-05-162611.png" alt></p>
+<p>如上图所示，Client发起一个请求，RPC框架将这个请求发送到服务提供方Server，此时Client将会一直等待直到Server处理完毕并返回结果或超时，此时Server接受到Client发送的请求，并对这个请求进行解析，计算结果，将结果以同样的方式返回，然后Server重新进入监听状态，以迎接下一个请求的到来。</p>
+<p>​    总的来说，RPC框架就是一个不同系统之间进行交互的聊天工具。在开发分布式应用时，完全不需要考虑底层到底是用了HTTP协议，还是其他通信协议，因为这是RPC框架自己的事情，而你只要告诉RPC框架，你需要调用的是什么方法。</p>
+<h2 id="RPC存在的意义"><a href="#RPC存在的意义" class="headerlink" title="RPC存在的意义"></a>RPC存在的意义</h2><p>​    在DUBBO的USER BOOK中，介绍了四种随着互联网发展，网站应用不断扩大规模是，必定会经历的4中网站架构：单一应用架构、垂直应用架构、分布式服务架构和流动计算架构。</p>
+<p><img src="http://pic.jingl.wang/2018-02-05-162636.png" alt></p>
+<p>​    在起步阶段，网站的流量很小，为减少部署节点和成本，可以将所有的功能放在一个应用中，随着网站的发展，流量慢慢变大，单一应用架构已经不足以支撑日益增加的访问量，此时可以将一个应用拆分成多个互不相干的应用，以提升单个应用的效率，这便是垂直应用架构，随着网站规模进一步的扩大，垂直应用越来越多，应用间的交互不可避免，所以需要将核心的业务从应用中抽离出来，变成公共的服务，而此时，一个能整合业务复用及整合的RPC框架就是关键。当服务越来越多，服务的管理就成了一个问题，这时候灵活的服务治理（SOA)就是最重要的地方。</p>
+<p>​    无论是什么网站，殊途同归，微服务总是最终的归宿，如何让各个服务之间相互的调用变得简单和高效，这就是一个RPC框架应该去解决的问题，</p>
+<h2 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h2><p>在 Nelson 1984年发表的论文<a href="http://birrell.org/andrew/papers/ImplementingRPC.pdf" target="_blank" rel="noopener"> Implementing Remote Procedure Calls</a> 中提出，RPC由5个部分组成：</p>
 <ul>
-<li>用数组存储每个桶的首节点</li>
-<li>使用hash值分桶</li>
-<li>hash值相同的元素，以链表的形式存放在桶中</li>
-<li>当一个桶内的元素超过8个时，将链表转换为红黑树</li>
+<li>User</li>
+<li>User Stub</li>
+<li>RPCRuntime</li>
+<li>Server Stub</li>
+<li>Server</li>
 </ul>
+<p>这5个部分的联系如下图所示</p>
+<p><img src="http://pic.jingl.wang/2018-02-06-053158.png" alt></p>
+<p>根据 Nelson 的描述，当远程调用发生时，User调用的是本地的User Stub，User stub 将请求根据协议打包成一个消息，通过RPCRuntime传递到服务端，此时，客户端将进入等待状态。服务端的RPCRuntime接受客户端的请求消息，接着经由Server Stub拆包，调用本地方法进行相应计算，获得结果。最后将结果经由相同的链路发送到客户端User手中，进行返回。</p>
+<p>​    传统的RPC模型只描述了点到点的调用流程，在实际运用中，还需要考虑负载均衡、服务的高可用等问题，所以产品级的RPC框架一般还会有一个注册中心来提供服务的发现、注销和负载均衡等功能。</p>
+<p><img src="http://pic.jingl.wang/2018-02-09-023427.png" alt></p>
+<p>在Client 和 Server 直接还是如 Nelson 的模型一样进行连接，与Nelson 不同的是Client和Server都需要与一个注册中心Register进行通信，当有新的Server发布时，Server 需要向 Register 进行注册， 此时，Register 会通知所有的Client有新的服务发布，并更新Client的缓存，当Client发起远程调用时，会在缓存中选取一台Server进行通信。Client 和 Server 与 Register 都有心跳检测，所以，当集群中某一台服务器下线时，Register 会马上知道，并会通知所有的Client该服务器下线，刷新Client缓存。</p>
+<h2 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h2><p>总结一下在 Nelson 描述的调用模型中，远程服务调用的步骤：</p>
+<ul>
+<li>client调用client stub，这是一次本地过程调用。</li>
+<li>client stub将参数打包成一个消息，然后发送这个消息。</li>
+<li>client所在的系统将消息发送给server。</li>
+<li>server的的系统将收到的包传给server stub。</li>
+<li>server stub解包得到参数。</li>
+<li>最后server stub调用服务过程. 返回结果按照相反的步骤传给client。</li>
+</ul>
+<h2 id="REFER"><a href="#REFER" class="headerlink" title="REFER"></a>REFER</h2><p><a href="https://www.gitbook.com/book/smallnest/go-rpc-programming-guide/details" target="_blank" rel="noopener">Go RPC 开发指南</a></p>
+<p><a href="http://blog.csdn.net/mindfloating/article/details/39473807" target="_blank" rel="noopener">深入浅出 RPC - 浅出篇</a></p>
+
         </div>
         
-        
-        <div class="level is-mobile">
+        <div class="level is-size-7 is-uppercase">
             <div class="level-start">
                 <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2018/02/01/java/ConcurrentHashMap源码浅析/#more">阅读更多</a>
+                    <span class="is-size-6 has-text-grey has-mr-7">#</span>
+                    <a class="has-link-grey -link" href="/tags/Java/">Java</a>, <a class="has-link-grey -link" href="/tags/RPC/">RPC</a>
                 </div>
             </div>
         </div>
+        
         
         
     </div>
@@ -563,9 +244,50 @@ var _hmt = _hmt || [];
 
 
 
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev" href="/2018/04/14/jvm/JavaMemory/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">Java内存区域</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next" href="/2018/02/01/java/ConcurrentHashMap源码浅析/">
+                <span class="level-item">ConcurrentHashMap源码浅析</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
 
 
 
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        
+<div id="comment-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.min.js"></script>
+<script>
+    var gitalk = new Gitalk({
+        clientID: 'cf7aa758f9a4052fbe0f',
+        clientSecret: '28e7b77e22f03e858a36363da98599efc090de9f',
+        id: '1c891435e0adedca14e26e6da88f1b5a',
+        repo: 'talk',
+        owner: 'jingleWang',
+        admin: "jingleWang"
+    })
+    gitalk.render('comment-container')
+</script>
+
+    </div>
+</div>
 </div>
                 
 
@@ -668,6 +390,37 @@ var _hmt = _hmt || [];
 </div>
     
         
+<div class="card widget" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#RPC是什么">
+        <span class="has-mr-6">1</span>
+        <span>RPC是什么</span>
+        </a></li><li>
+        <a class="is-flex" href="#RPC存在的意义">
+        <span class="has-mr-6">2</span>
+        <span>RPC存在的意义</span>
+        </a></li><li>
+        <a class="is-flex" href="#结构">
+        <span class="has-mr-6">3</span>
+        <span>结构</span>
+        </a></li><li>
+        <a class="is-flex" href="#流程">
+        <span class="has-mr-6">4</span>
+        <span>流程</span>
+        </a></li><li>
+        <a class="is-flex" href="#REFER">
+        <span class="has-mr-6">5</span>
+        <span>REFER</span>
+        </a></li></ul>
+        </div>
+    </div>
+</div>
+
     
         
 
@@ -1248,7 +1001,7 @@ var _hmt = _hmt || [];
             <div class="level-start has-text-centered-mobile">
                 <a class="footer-logo is-block has-mb-6" href="/">
                 
-                    <img src="/images/jinglu.png" alt="Ben&#39;s Blog" height="28">
+                    <img src="/images/jinglu.png" alt="RPC" height="28">
                 
                 </a>
                 <p class="is-size-7">

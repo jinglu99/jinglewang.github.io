@@ -2,21 +2,23 @@
 <html lang="zh">
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-<title>分类: 源码阅读 - Ben&#39;s Blog</title>
+<title>ArrayList源码阅读 - Ben&#39;s Blog</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
 
 
-    <meta name="description" content="生活是一种艺术">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Ben&#39;s Blog">
-<meta property="og:url" content="http://yoursite.com/categories/Java/源码阅读/index.html">
+    <meta name="description" content="ArrayList是List接口的一个可伸缩数组实现，实现了所有List接口的方法，用来存储一组数据，允许所有类型的对象，包括NULL，它是非线程安全的。ArrayList底层是一个可以伸缩的数组，List中的每个元素依次存放在这个数组中，并使用成员变量size来标记List中元素的个数，当插入新元素时，新元素会被放入到数组中size的位置，并将size+1，当删除一个元素时，例如删除下标为n的元">
+<meta name="keywords" content="Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ArrayList源码阅读">
+<meta property="og:url" content="http://yoursite.com/2019/04/23/java/ArrayList源码阅读/index.html">
 <meta property="og:site_name" content="Ben&#39;s Blog">
-<meta property="og:description" content="生活是一种艺术">
+<meta property="og:description" content="ArrayList是List接口的一个可伸缩数组实现，实现了所有List接口的方法，用来存储一组数据，允许所有类型的对象，包括NULL，它是非线程安全的。ArrayList底层是一个可以伸缩的数组，List中的每个元素依次存放在这个数组中，并使用成员变量size来标记List中元素的个数，当插入新元素时，新元素会被放入到数组中size的位置，并将size+1，当删除一个元素时，例如删除下标为n的元">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-04-23T07:53:56.261Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Ben&#39;s Blog">
-<meta name="twitter:description" content="生活是一种艺术">
+<meta name="twitter:title" content="ArrayList源码阅读">
+<meta name="twitter:description" content="ArrayList是List接口的一个可伸缩数组实现，实现了所有List接口的方法，用来存储一组数据，允许所有类型的对象，包括NULL，它是非线程安全的。ArrayList底层是一个可以伸缩的数组，List中的每个元素依次存放在这个数组中，并使用成员变量size来标记List中元素的个数，当插入新元素时，新元素会被放入到数组中size的位置，并将size+1，当删除一个元素时，例如删除下标为n的元">
 
 
 
@@ -98,7 +100,7 @@ var _hmt = _hmt || [];
         <div class="navbar-brand is-flex-center">
             <a class="navbar-item navbar-logo" href="/">
             
-                <img src="/images/jinglu.png" alt="Ben&#39;s Blog" height="28">
+                <img src="/images/jinglu.png" alt="ArrayList源码阅读" height="28">
             
             </a>
         </div>
@@ -128,6 +130,10 @@ var _hmt = _hmt || [];
                     
                 
                 
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
                 
                 <a class="navbar-item search" title="搜索" href="javascript:;">
                     <i class="fas fa-search"></i>
@@ -142,25 +148,11 @@ var _hmt = _hmt || [];
         <div class="container">
             <div class="columns">
                 <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main"><div class="card">
-    <div class="card-content">
-        <nav class="breadcrumb" aria-label="breadcrumbs">
-        <ul>
-            <li><a href="/categories">分类</a></li>
-            
-            <li><a href="/categories/Java/">Java</a></li>
-            
-            <li class="is-active"><a href="#" aria-current="page">源码阅读</a></li>
-        </ul>
-        </nav>
-    </div>
-</div>
-
-    <div class="card">
     
     <div class="card-image">
-        <a href="/2019/04/23/java/ArrayList源码阅读/" class="image is-7by1">
+        <span class="image is-7by1">
             <img class="thumbnail" src="http://pic.jingl.wang/2019-04-23-timg%20-1-.jpeg" alt="ArrayList源码阅读">
-        </a>
+        </span>
     </div>
     
     <div class="card-content article ">
@@ -186,21 +178,39 @@ var _hmt = _hmt || [];
         
         <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
             
-                <a class="has-link-black-ter" href="/2019/04/23/java/ArrayList源码阅读/">ArrayList源码阅读</a>
+                ArrayList源码阅读
             
         </h1>
         <div class="content">
-            <p>ArrayList是List接口的一个可伸缩数组实现，实现了所有List接口的方法，用来存储一组数据，允许所有类型的对象，包括NULL，它是非线程安全的。ArrayList底层是一个可以伸缩的数组，List中的每个元素依次存放在这个数组中，并使用成员变量size来标记List中元素的个数，当插入新元素时，新元素会被放入到数组中size的位置，并将size+1，当删除一个元素时，例如删除下标为n的元素，则将n+1之后的元素向前移动一位，并将size-1。数组是可伸缩的，每次插入时,会检查当前数组是否可以容纳新元素，如果不能则会对其扩容，将数组长度变为原来的1.5倍。除了被动的改变数组长度，ArrayList也提供了2个主动改变数组的方法：<br></p>
+            <p>ArrayList是List接口的一个可伸缩数组实现，实现了所有List接口的方法，用来存储一组数据，允许所有类型的对象，包括NULL，它是非线程安全的。ArrayList底层是一个可以伸缩的数组，List中的每个元素依次存放在这个数组中，并使用成员变量size来标记List中元素的个数，当插入新元素时，新元素会被放入到数组中size的位置，并将size+1，当删除一个元素时，例如删除下标为n的元素，则将n+1之后的元素向前移动一位，并将size-1。数组是可伸缩的，每次插入时,会检查当前数组是否可以容纳新元素，如果不能则会对其扩容，将数组长度变为原来的1.5倍。除了被动的改变数组长度，ArrayList也提供了2个主动改变数组的方法：<br><a id="more"></a></p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">trimToSize</span><span class="hljs-params">()</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">ensureCapacity</span><span class="hljs-params">(<span class="hljs-keyword">int</span> minCapacity)</span></span></span><br></pre></td></tr></table></figure>
+<p><code>trimToSize</code>用于将数组大小缩短为size，减少数组所占用的空间，<code>ensureCapacity</code>用来增加数组长度，以确保数组长度大于minCapacity。</p>
+<p><code>size</code>、<code>isEmpty</code>、<code>get</code>、<code>set</code>、<code>iterator</code>因为是对数组直接操作，所以时间复杂度是O（1）的。</p>
+<p>ArrayList平凡的扩容可能会影响插入的性能，所以为了减少ArrayList扩容的次数，可以在初始化阶段，提前指定一个初始化容量。</p>
+<p>ArrayList的迭代也是遵循fail-fast机制的，当在迭代过程中，发生结构修改时，会抛出<code>ConcurrentModificationException</code>异常，这个检查是通过<code>modCount</code>实现的。</p>
+<h2 id="构造方法"><a href="#构造方法" class="headerlink" title="构造方法"></a>构造方法</h2><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ArrayList</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">this</span>.elementData = DEFAULTCAPACITY_EMPTY_ELEMENTDATA;</span><br><span class="line">&#125;	</span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ArrayList</span><span class="hljs-params">(<span class="hljs-keyword">int</span> initialCapacity)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">if</span> (initialCapacity &gt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">this</span>.elementData = <span class="hljs-keyword">new</span> Object[initialCapacity];</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (initialCapacity == <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">this</span>.elementData = EMPTY_ELEMENTDATA;</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"Illegal Capacity: "</span>+</span><br><span class="line">                                           initialCapacity);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ArrayList</span><span class="hljs-params">(Collection&lt;? extends E&gt; c)</span> </span>&#123;</span><br><span class="line">    elementData = c.toArray();</span><br><span class="line">    <span class="hljs-keyword">if</span> ((size = elementData.length) != <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        <span class="hljs-comment">// c.toArray might (incorrectly) not return Object[] (see 6260652)</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (elementData.getClass() != Object[].class)</span><br><span class="line">            elementData = Arrays.copyOf(elementData, size, Object[].class);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">        <span class="hljs-comment">// replace with empty array.</span></span><br><span class="line">        <span class="hljs-keyword">this</span>.elementData = EMPTY_ELEMENTDATA;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>ArrayList提供了3个构造方法，默认的无参构造函数只是将数组大小赋值为一个空数组，在之后的插入过程中在进行扩容操作，<code>ArrayList(int initialCapacity)</code>方法指定了一个初始化容量大小，构造方法通过指定这个初始化容量新建一个指定大小的数组，当ArrayList元素较多时，可以使用这个构造方法，并传入一个较大的initialCapacity。</p>
+<h2 id="add"><a href="#add" class="headerlink" title="add"></a>add</h2><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">add</span><span class="hljs-params">(E e)</span> </span>&#123;</span><br><span class="line">    ensureCapacityInternal(size + <span class="hljs-number">1</span>);  <span class="hljs-comment">// Increments modCount!!</span></span><br><span class="line">    elementData[size++] = e;</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>ArrayList的插入操作一共有2步操作，第一步就是判断当前数组大小是否足够容纳新元素的插入，如果大小不够，则进行扩容，这一步在<code>ensureCapacityInternal</code>中进行，此外在这个方法中，还会对<code>modCount</code>进行自增操作，第二步就可以将新元素放到数组对应的位置了。</p>
+<h3 id="扩容"><a href="#扩容" class="headerlink" title="扩容"></a>扩容</h3><p>当ArrayList中数组长度不够或者调用<code>ensureCapacity</code>方法时，会触发扩容，ArrayList的扩容逻辑非常的简单：</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">grow</span><span class="hljs-params">(<span class="hljs-keyword">int</span> minCapacity)</span> </span>&#123;</span><br><span class="line">       <span class="hljs-comment">// overflow-conscious code</span></span><br><span class="line">       <span class="hljs-keyword">int</span> oldCapacity = elementData.length;</span><br><span class="line">       <span class="hljs-comment">//新数组长度为原来的1.5倍</span></span><br><span class="line">       <span class="hljs-keyword">int</span> newCapacity = oldCapacity + (oldCapacity &gt;&gt; <span class="hljs-number">1</span>);</span><br><span class="line">       <span class="hljs-keyword">if</span> (newCapacity - minCapacity &lt; <span class="hljs-number">0</span>)</span><br><span class="line">           newCapacity = minCapacity;	<span class="hljs-comment">//如果新的长度小于指定值，则使用minCapacity</span></span><br><span class="line">       <span class="hljs-keyword">if</span> (newCapacity - MAX_ARRAY_SIZE &gt; <span class="hljs-number">0</span>)</span><br><span class="line">           newCapacity = hugeCapacity(minCapacity);</span><br><span class="line">       <span class="hljs-comment">// minCapacity is usually close to size, so this is a win:</span></span><br><span class="line">       <span class="hljs-comment">//复制</span></span><br><span class="line">       elementData = Arrays.copyOf(elementData, newCapacity);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>默认将会把数组长度扩大为原来的1.5倍。然后从老数组中将所有数据复制到新数组中，替换老数组。</p>
+<h2 id="remove"><a href="#remove" class="headerlink" title="remove"></a>remove</h2><p>ArrayList提供了2个remove方法：</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">	<span class="hljs-function"><span class="hljs-keyword">public</span> E <span class="hljs-title">remove</span><span class="hljs-params">(<span class="hljs-keyword">int</span> index)</span> </span>&#123;</span><br><span class="line">       rangeCheck(index);</span><br><span class="line"></span><br><span class="line">       modCount++;</span><br><span class="line">       E oldValue = elementData(index);	<span class="hljs-comment">//指定下标的元素</span></span><br><span class="line"></span><br><span class="line">       <span class="hljs-keyword">int</span> numMoved = size - index - <span class="hljs-number">1</span>;</span><br><span class="line">       <span class="hljs-keyword">if</span> (numMoved &gt; <span class="hljs-number">0</span>)</span><br><span class="line">           System.arraycopy(elementData, index+<span class="hljs-number">1</span>, elementData, index,</span><br><span class="line">                            numMoved);	<span class="hljs-comment">//将下标大于index的元素向前移动</span></span><br><span class="line">       </span><br><span class="line">       <span class="hljs-comment">//将数组中最后的元素复制为null 防止内存泄漏</span></span><br><span class="line">       elementData[--size] = <span class="hljs-keyword">null</span>; <span class="hljs-comment">// clear to let GC do its work</span></span><br><span class="line"></span><br><span class="line">       <span class="hljs-keyword">return</span> oldValue;</span><br><span class="line">   &#125;	</span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">remove</span><span class="hljs-params">(Object o)</span> </span>&#123;</span><br><span class="line">       <span class="hljs-keyword">if</span> (o == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">           <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> index = <span class="hljs-number">0</span>; index &lt; size; index++)</span><br><span class="line">               <span class="hljs-keyword">if</span> (elementData[index] == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">                   fastRemove(index);</span><br><span class="line">                   <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;</span><br><span class="line">               &#125;</span><br><span class="line">       &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">           <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> index = <span class="hljs-number">0</span>; index &lt; size; index++)</span><br><span class="line">               <span class="hljs-keyword">if</span> (o.equals(elementData[index])) &#123;</span><br><span class="line">                   fastRemove(index);</span><br><span class="line">                   <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;</span><br><span class="line">               &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>ArrayList提供了2个remove方法，第一个用来移除指定下标的元素，第二个用来移除指定对象。</p>
+<h2 id="get"><a href="#get" class="headerlink" title="get"></a>get</h2><p>没啥好讲，直接从数组拿数据。。。</p>
+
         </div>
         
-        
-        <div class="level is-mobile">
+        <div class="level is-size-7 is-uppercase">
             <div class="level-start">
                 <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2019/04/23/java/ArrayList源码阅读/#more">阅读更多</a>
+                    <span class="is-size-6 has-text-grey has-mr-7">#</span>
+                    <a class="has-link-grey -link" href="/tags/Java/">Java</a>
                 </div>
             </div>
         </div>
+        
         
         
     </div>
@@ -210,131 +220,43 @@ var _hmt = _hmt || [];
 
 
 
-
-
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2019/04/19/java/HashMap/" class="image is-7by1">
-            <img class="thumbnail" src="http://pic.jingl.wang/2019-04-19-u-1418578175-1769712762%26fm-26%26gp-0.jpg" alt="HashMap源码">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
         
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2019-04-19T06:00:00.000Z">2019-04-19</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/Java/">Java</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/Java/源码阅读/">源码阅读</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    21 分钟 读完 (大约 3139 个字)
-                </span>
-                
-                
-            </div>
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next" href="/2019/04/19/java/HashMap/">
+                <span class="level-item">HashMap源码</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
         </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2019/04/19/java/HashMap/">HashMap源码</a>
-            
-        </h1>
-        <div class="content">
-            <p>HashMap是一个基于散列表的Map实现，和HashTable类似，实现了所有的Map方法，但与HashTable不同的是，HashMap允许key和value的值为null，且HashMap是线程不安全的。HashMap不会保证映射的顺序。<br></p>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2019/04/19/java/HashMap/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
         
     </div>
 </div>
 
 
 
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        
+<div id="comment-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.4.1/dist/gitalk.min.js"></script>
+<script>
+    var gitalk = new Gitalk({
+        clientID: 'cf7aa758f9a4052fbe0f',
+        clientSecret: '28e7b77e22f03e858a36363da98599efc090de9f',
+        id: '2ebdcc9b3faeb6733e47ec7934eb3c66',
+        repo: 'talk',
+        owner: 'jingleWang',
+        admin: "jingleWang"
+    })
+    gitalk.render('comment-container')
+</script>
 
-
-
-
-
-    <div class="card">
-    
-    <div class="card-image">
-        <a href="/2018/02/01/java/ConcurrentHashMap源码浅析/" class="image is-7by1">
-            <img class="thumbnail" src="http://pic.jingl.wang/2018-04-14-115554.jpg" alt="ConcurrentHashMap源码浅析">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey" datetime="2018-02-01T09:48:25.000Z">2018-02-01</time>
-                
-                <div class="level-item">
-                <a class="has-link-grey -link" href="/categories/Java/">Java</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/Java/源码阅读/">源码阅读</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    16 分钟 读完 (大约 2460 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-                <a class="has-link-black-ter" href="/2018/02/01/java/ConcurrentHashMap源码浅析/">ConcurrentHashMap源码浅析</a>
-            
-        </h1>
-        <div class="content">
-            <h2 id="基本数据结构"><a href="#基本数据结构" class="headerlink" title="基本数据结构"></a>基本数据结构</h2><p><img src="http://pic.jingl.wang/2018-04-14-114851.png" alt></p>
-<ul>
-<li>用数组存储每个桶的首节点</li>
-<li>使用hash值分桶</li>
-<li>hash值相同的元素，以链表的形式存放在桶中</li>
-<li>当一个桶内的元素超过8个时，将链表转换为红黑树</li>
-</ul>
-        </div>
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                <a class="button is-size-7 is-light" href="/2018/02/01/java/ConcurrentHashMap源码浅析/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
     </div>
 </div>
-
-
-
-
-
-
-
-
 </div>
                 
 
@@ -437,6 +359,37 @@ var _hmt = _hmt || [];
 </div>
     
         
+<div class="card widget" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#构造方法">
+        <span class="has-mr-6">1</span>
+        <span>构造方法</span>
+        </a></li><li>
+        <a class="is-flex" href="#add">
+        <span class="has-mr-6">2</span>
+        <span>add</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#扩容">
+        <span class="has-mr-6">2.1</span>
+        <span>扩容</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#remove">
+        <span class="has-mr-6">3</span>
+        <span>remove</span>
+        </a></li><li>
+        <a class="is-flex" href="#get">
+        <span class="has-mr-6">4</span>
+        <span>get</span>
+        </a></li></ul>
+        </div>
+    </div>
+</div>
+
     
         
 
@@ -1017,7 +970,7 @@ var _hmt = _hmt || [];
             <div class="level-start has-text-centered-mobile">
                 <a class="footer-logo is-block has-mb-6" href="/">
                 
-                    <img src="/images/jinglu.png" alt="Ben&#39;s Blog" height="28">
+                    <img src="/images/jinglu.png" alt="ArrayList源码阅读" height="28">
                 
                 </a>
                 <p class="is-size-7">

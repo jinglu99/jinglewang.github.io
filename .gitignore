@@ -2,3 +2,5 @@ db.json
 public/
 
 .deploy_git/
+*.log
+debug.log
